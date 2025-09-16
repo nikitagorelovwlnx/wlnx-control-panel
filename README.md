@@ -1,71 +1,71 @@
 # WLNX Control Panel
 
-Легковесный браузерный интерфейс на TypeScript для отображения данных из [wlnx-api-server](https://github.com/nikitagorelovwlnx/wlnx-api-server).
+Lightweight TypeScript browser interface for displaying data from [wlnx-api-server](https://github.com/nikitagorelovwlnx/wlnx-api-server).
 
-## Возможности
+## Features
 
-- 👥 **Пользователи** - просмотр списка пользователей с их статусами
-- 💬 **Интервью** - переписка во время интервью в реальном времени
-- 📋 **Саммари** - сводки и результаты интервью
+- 👥 **Users** - view user list with their statuses
+- 💬 **Interviews** - real-time interview chat messages
+- 📋 **Summaries** - interview summaries and results
 
-## Технологии
+## Technologies
 
 - TypeScript
-- Vanilla JavaScript (без фреймворков)
+- Vanilla JavaScript (no frameworks)
 - Modern CSS
 - ES Modules
 
-## Быстрый старт
+## Quick Start
 
-### 1. Установка зависимостей
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Сборка проекта
+### 2. Build Project
 ```bash
 npm run build
 ```
 
-### 3. Запуск в режиме разработки
+### 3. Run in Development Mode
 ```bash
 npm run dev
 ```
 
-Приложение будет доступно по адресу: http://localhost:3000
+Application will be available at: http://localhost:3000
 
-### 4. Продакшен
+### 4. Production
 ```bash
 npm run start
 ```
 
-## Структура проекта
+## Project Structure
 
 ```
 wlnx-control-panel/
 ├── src/
 │   ├── api/
-│   │   └── client.ts          # API клиент для взаимодействия с сервером
+│   │   └── client.ts          # API client for server communication
 │   ├── components/
-│   │   ├── UsersList.ts       # Компонент списка пользователей
-│   │   ├── ChatView.ts        # Компонент переписки
-│   │   └── SummaryView.ts     # Компонент саммари
+│   │   ├── UsersList.ts       # Users list component
+│   │   ├── ChatView.ts        # Chat messages component
+│   │   └── SummaryView.ts     # Summary display component
 │   ├── types/
-│   │   └── api.ts            # TypeScript интерфейсы
+│   │   └── api.ts            # TypeScript interfaces
 │   ├── styles/
-│   │   └── main.css          # Основные стили
-│   └── index.ts              # Главный файл приложения
-├── dist/                     # Скомпилированные файлы
-├── index.html               # Основная HTML страница
+│   │   └── main.css          # Main styles
+│   └── index.ts              # Main application file
+├── dist/                     # Compiled files
+├── index.html               # Main HTML page
 ├── package.json
 └── tsconfig.json
 ```
 
-## Настройка API
+## API Configuration
 
-По умолчанию приложение подключается к API серверу по адресу `http://localhost:8000`.
+By default, the application connects to the API server at `http://localhost:8000`.
 
-Для изменения адреса API сервера отредактируйте файл `src/api/client.ts`:
+To change the API server address, edit the file `src/api/client.ts`:
 
 ```typescript
 constructor(baseUrl: string = 'YOUR_API_URL') {
@@ -73,41 +73,41 @@ constructor(baseUrl: string = 'YOUR_API_URL') {
 }
 ```
 
-## Ожидаемые API эндпоинты
+## Expected API Endpoints
 
-Приложение ожидает следующие эндпоинты от API сервера:
+The application expects the following endpoints from the API server:
 
-- `GET /api/health` - проверка состояния API
-- `GET /api/users` - список пользователей
-- `GET /api/interviews` - список интервью
-- `GET /api/interviews/{id}/messages` - сообщения интервью
-- `GET /api/interviews/{id}/summary` - саммари интервью
+- `GET /api/health` - API health check
+- `GET /api/users` - users list
+- `GET /api/interviews` - interviews list
+- `GET /api/interviews/{id}/messages` - interview messages
+- `GET /api/interviews/{id}/summary` - interview summary
 
-## Особенности
+## Features
 
-- ✅ Адаптивный дизайн для мобильных устройств
-- ✅ Автоматическая проверка подключения к API
-- ✅ Обработка ошибок и состояний загрузки
-- ✅ Современный Material Design интерфейс
-- ✅ Без авторизации (как требовалось)
-- ✅ Легковесность - минимум зависимостей
+- ✅ Responsive design for mobile devices
+- ✅ Automatic API connection checking
+- ✅ Error handling and loading states
+- ✅ Modern Material Design interface
+- ✅ No authentication required
+- ✅ Lightweight - minimal dependencies
 
-## Разработка
+## Development
 
-### Команды
+### Commands
 
-- `npm run build` - сборка TypeScript в JavaScript
-- `npm run dev` - режим разработки с автоперезагрузкой
-- `npm run start` - запуск статического сервера
-- `npm run type-check` - проверка типов без сборки
+- `npm run build` - compile TypeScript to JavaScript
+- `npm run dev` - development mode with auto-reload
+- `npm run start` - start static server
+- `npm run type-check` - type checking without compilation
 
-### Добавление новых функций
+### Adding New Features
 
-1. Добавьте новые типы в `src/types/api.ts`
-2. Обновите API клиент в `src/api/client.ts`
-3. Создайте новый компонент в `src/components/`
-4. Обновите главное приложение в `src/index.ts`
+1. Add new types to `src/types/api.ts`
+2. Update API client in `src/api/client.ts`
+3. Create new component in `src/components/`
+4. Update main application in `src/index.ts`
 
-## Лицензия
+## License
 
 MIT
