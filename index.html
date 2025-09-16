@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WLNX Control Panel</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>WLNX Control Panel</h1>
+            <div class="status-indicator">
+                <span id="api-status" class="status-dot offline"></span>
+                <span id="api-status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="sidebar">
+                <nav class="nav">
+                    <button class="nav-item active" data-tab="users">
+                        <span class="nav-icon">👥</span>
+                        Users
+                    </button>
+                    <button class="nav-item" data-tab="interviews">
+                        <span class="nav-icon">💬</span>
+                        Interviews
+                    </button>
+                    <button class="nav-item" data-tab="summaries">
+                        <span class="nav-icon">📋</span>
+                        Summaries
+                    </button>
+                </nav>
+            </div>
+
+            <div class="content">
+                <div id="users-tab" class="tab-content active">
+                    <div class="section-header">
+                        <h2>Users</h2>
+                        <button id="refresh-users" class="refresh-btn">🔄 Refresh</button>
+                    </div>
+                    <div id="users-list" class="users-list">
+                        <div class="loading">Loading users...</div>
+                    </div>
+                </div>
+
+                <div id="interviews-tab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Interview Chat</h2>
+                        <select id="interview-select" class="select">
+                            <option value="">Select an interview...</option>
+                        </select>
+                    </div>
+                    <div id="chat-messages" class="chat-container">
+                        <div class="empty-state">Select an interview to view messages</div>
+                    </div>
+                </div>
+
+                <div id="summaries-tab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Interview Summaries</h2>
+                        <select id="summary-select" class="select">
+                            <option value="">Select an interview...</option>
+                        </select>
+                    </div>
+                    <div id="summary-content" class="summary-container">
+                        <div class="empty-state">Select an interview to view summary</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="dist/index.js"></script>
+</body>
+</html>
