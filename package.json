@@ -1,0 +1,21 @@
+{
+  "name": "wlnx-control-panel",
+  "version": "1.0.0",
+  "description": "Lightweight TypeScript browser interface for WLNX API data visualization",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w & live-server --port=3000 --host=localhost --entry-file=index.html",
+    "start": "live-server --port=3000 --host=localhost --entry-file=index.html",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "live-server": "^1.2.2",
+    "@types/node": "^20.8.0"
+  },
+  "dependencies": {},
+  "keywords": ["typescript", "browser", "api", "dashboard"],
+  "author": "Nikita Gorelov",
+  "license": "MIT"
+}
