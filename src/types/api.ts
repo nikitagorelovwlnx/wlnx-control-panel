@@ -2,9 +2,10 @@
 
 export interface User {
     email: string;
-    interview_count: number;
-    last_interview: string;
-    first_interview: string;
+    session_count: number;
+    last_session: string;
+    first_session: string;
+    sessions?: Interview[];
 }
 
 export interface ChatMessage {

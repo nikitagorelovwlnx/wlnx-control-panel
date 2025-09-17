@@ -87,8 +87,8 @@ export class UsersList {
     }
 
     private createUserCard(user: User): string {
-        const lastInterview = user.last_interview 
-            ? new Date(user.last_interview).toLocaleDateString('en-US', {
+        const lastSession = user.last_session 
+            ? new Date(user.last_session).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
@@ -97,15 +97,15 @@ export class UsersList {
             })
             : 'Never';
         
-        const firstInterview = user.first_interview 
-            ? new Date(user.first_interview).toLocaleDateString('en-US', {
+        const firstSession = user.first_session 
+            ? new Date(user.first_session).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
             })
             : 'Never';
 
-        const status = user.interview_count > 0 ? 'active' : 'inactive';
+        const status = user.session_count > 0 ? 'active' : 'inactive';
         const statusText = status === 'active' ? 'Active' : 'Inactive';
 
         const interviews = this.usersInterviews.get(user.email) || [];
@@ -131,15 +131,15 @@ export class UsersList {
                 
                 <div class="user-stats">
                     <div class="stat-item">
-                        <span class="stat-value">${user.interview_count}</span>
-                        <span class="stat-label">Interviews</span>
+                        <span class="stat-value">${user.session_count}</span>
+                        <span class="stat-label">Sessions</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${lastInterview !== 'Never' ? this.getTimeAgo(user.last_interview) : 'Never'}</span>
+                        <span class="stat-value">${lastSession !== 'Never' ? this.getTimeAgo(user.last_session) : 'Never'}</span>
                         <span class="stat-label">Latest</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${firstInterview !== 'Never' ? this.getTimeAgo(user.first_interview) : 'Never'}</span>
+                        <span class="stat-value">${firstSession !== 'Never' ? this.getTimeAgo(user.first_session) : 'Never'}</span>
                         <span class="stat-label">First</span>
                     </div>
                 </div>
