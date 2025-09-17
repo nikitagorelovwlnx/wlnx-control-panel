@@ -10,9 +10,15 @@
     <div class="container">
         <header class="header">
             <h1>WLNX Control Panel</h1>
-            <div class="status-indicator">
-                <span id="api-status" class="status-dot offline"></span>
-                <span id="api-status-text">Connecting...</span>
+            <div class="status-indicators">
+                <div class="status-indicator">
+                    <span id="server-status" class="status-dot offline"></span>
+                    <span id="server-status-text">Server: Connecting...</span>
+                </div>
+                <div class="status-indicator">
+                    <span id="bot-status" class="status-dot offline"></span>
+                    <span id="bot-status-text">Bot: Checking...</span>
+                </div>
             </div>
         </header>
 

@@ -33,6 +33,11 @@ body {
     color: #1e293b;
 }
 
+.status-indicators {
+    display: flex;
+    gap: 1.5rem;
+}
+
 .status-indicator {
     display: flex;
     align-items: center;

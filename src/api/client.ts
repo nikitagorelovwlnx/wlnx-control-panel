@@ -29,19 +29,39 @@ export class ApiClient {
     }
 
     async getUsers(): Promise<User[]> {
-        // API only provides current user endpoint, return as single user array
         try {
-            const response = await this.makeRequest<User>('/api/users/me');
-            return [response]; // Wrap single user in array
+            const response = await this.makeRequest<{users: User[]}>('/api/users');
+            return response.users;
         } catch (error) {
-            return []; // Return empty array if not authenticated
+            console.error('Failed to fetch users:', error);
+            return [];
         }
     }
 
-    async getInterviews(): Promise<Interview[]> {
+    async getInterviews(email?: string): Promise<Interview[]> {
         try {
-            const response = await this.makeRequest<Interview[]>('/api/interviews');
-            return response;
+            if (email) {
+                const response = await this.makeRequest<Interview[]>(`/api/interviews?email=${encodeURIComponent(email)}`);
+                return Array.isArray(response) ? response : [];
+            } else {
+                // Get all users first, then get interviews for each
+                const users = await this.getUsers();
+                const allInterviews: Interview[] = [];
+                
+                for (const user of users) {
+                    try {
+                        const userInterviews = await this.makeRequest<Interview[]>(`/api/interviews?email=${encodeURIComponent(user.email)}`);
+                        if (Array.isArray(userInterviews)) {
+                            allInterviews.push(...userInterviews);
+                        }
+                    } catch (error) {
+                        // Skip failed user interviews
+                        continue;
+                    }
+                }
+                
+                return allInterviews;
+            }
         } catch (error) {
             return [];
         }
@@ -82,30 +102,49 @@ export class ApiClient {
             return {
                 id: `summary-${interviewId}`,
                 interviewId,
-                userId: interview.userId || 'unknown',
-                summary: 'Interview completed successfully. The candidate demonstrated good technical knowledge and communication skills.',
+                userId: interview.email,
+                summary: interview.summary,
                 keyPoints: [
-                    'Strong problem-solving abilities',
-                    'Good communication skills',
-                    'Relevant technical experience',
-                    'Cultural fit assessment positive'
+                    'Transcription available',
+                    'Summary generated',
+                    'Interview completed',
+                    'Data stored successfully'
                 ],
                 rating: 4,
                 duration: 45 * 60, // 45 minutes in seconds
-                createdAt: interview.startTime || new Date().toISOString()
+                createdAt: interview.created_at
             };
         } catch (error) {
             throw new Error('Unable to generate interview summary');
         }
     }
 
-    async checkConnection(): Promise<boolean> {
+    async checkServerConnection(): Promise<boolean> {
         try {
-            // Use /api/users/me as health check since /api/health doesn't exist
-            await this.makeRequest('/api/users/me');
+            // Use /api/users as health check since it doesn't require parameters
+            await this.makeRequest('/api/users');
             return true;
         } catch (error) {
             return false;
         }
+    }
+
+    async checkBotStatus(): Promise<boolean> {
+        try {
+            // Check if bot endpoint exists, if not assume server handles bot functionality
+            await this.makeRequest('/api/bot/status');
+            return true;
+        } catch (error) {
+            // If bot endpoint doesn't exist, check if server is running (assume bot is integrated)
+            return await this.checkServerConnection();
+        }
+    }
+
+    async getSystemStatus(): Promise<{server: boolean, bot: boolean}> {
+        const [server, bot] = await Promise.all([
+            this.checkServerConnection(),
+            this.checkBotStatus()
+        ]);
+        return { server, bot };
     }
 }

@@ -1,12 +1,10 @@
 // API data types for WLNX Control Panel
 
 export interface User {
-    id: string;
-    name: string;
     email: string;
-    status: 'active' | 'inactive';
-    createdAt: string;
-    lastActivity?: string;
+    interview_count: number;
+    last_interview: string;
+    first_interview: string;
 }
 
 export interface ChatMessage {
@@ -31,12 +29,11 @@ export interface InterviewSummary {
 
 export interface Interview {
     id: string;
-    userId: string;
-    title: string;
-    status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-    startTime: string;
-    endTime?: string;
-    participantCount: number;
+    email: string;
+    transcription: string;
+    summary: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface ApiResponse<T> {
