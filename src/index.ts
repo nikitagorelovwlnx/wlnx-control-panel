@@ -1,144 +1,90 @@
 import { ApiClient } from './api/client.js';
-import { UsersList } from './components/UsersList.js';
-import { InterviewViewer } from './components/InterviewViewer.js';
+import { PanelsController } from './components/PanelsController.js';
 
 class ControlPanel {
     private apiClient: ApiClient;
-    private usersList: UsersList;
-    private interviewViewer: InterviewViewer;
+    private panelsController: PanelsController;
 
     constructor() {
         this.apiClient = new ApiClient();
-        this.usersList = new UsersList('users-list');
-        this.interviewViewer = new InterviewViewer('interview-viewer');
+        this.panelsController = new PanelsController(this.apiClient);
         
         this.init();
     }
 
     private async init(): Promise<void> {
-        this.setupEventListeners();
-        await this.checkSystemStatus();
         await this.loadInitialData();
-        this.startStatusPolling();
+        this.setupEventHandlers();
+        
+        // Start periodic status checks
+        setInterval(() => {
+            this.checkSystemStatus();
+        }, 30000); // Check every 30 seconds
     }
 
-    private startStatusPolling(): void {
-        // Check status every 5 seconds
-        setInterval(async () => {
-            await this.checkSystemStatus();
-        }, 5000);
-    }
-
-    private setupEventListeners(): void {
-        // Refresh users button
-        const refreshButton = document.getElementById('refresh-users');
-        refreshButton?.addEventListener('click', () => {
-            this.loadUsers();
+    private setupEventHandlers(): void {
+        // Refresh button
+        const refreshBtn = document.getElementById('refresh-btn');
+        refreshBtn?.addEventListener('click', () => {
+            this.refresh();
         });
 
-        // User selection handler for loading their interviews
-        this.usersList.onUserSelect(async (userEmail) => {
-            await this.loadUserInterviews(userEmail);
-        });
-
-        // Interview viewer integration
-        document.addEventListener('interviewSelected', async (e: any) => {
-            const interviewId = e.detail.interviewId;
-            await this.openInterviewViewer(interviewId);
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // ESC key to close panels
+            if (e.key === 'Escape') {
+                if (this.panelsController.isDetailsPanelOpen()) {
+                    document.getElementById('close-details')?.click();
+                } else if (this.panelsController.isSessionsPanelOpen()) {
+                    document.getElementById('close-sessions')?.click();
+                }
+            }
         });
     }
-
 
     private async checkSystemStatus(): Promise<void> {
-        const serverDot = document.getElementById('server-status');
-        const serverText = document.getElementById('server-status-text');
-        const botDot = document.getElementById('bot-status');
-        const botText = document.getElementById('bot-status-text');
-        
         try {
             const status = await this.apiClient.getSystemStatus();
             
-            // Update server status
-            if (status.server) {
-                serverDot?.classList.remove('offline');
-                serverDot?.classList.add('online');
-                if (serverText) serverText.textContent = 'Server: Connected';
-            } else {
-                serverDot?.classList.remove('online');
-                serverDot?.classList.add('offline');
-                if (serverText) serverText.textContent = 'Server: Disconnected';
+            const serverStatusElement = document.getElementById('server-status-text');
+            const botStatusElement = document.getElementById('bot-status-text');
+            
+            if (serverStatusElement) {
+                serverStatusElement.textContent = status.server ? 'Online' : 'Offline';
+                serverStatusElement.parentElement?.classList.toggle('online', status.server);
+                serverStatusElement.parentElement?.classList.toggle('offline', !status.server);
             }
             
-            // Update bot status
-            if (status.bot) {
-                botDot?.classList.remove('offline');
-                botDot?.classList.add('online');
-                if (botText) botText.textContent = 'Bot: Running';
-            } else {
-                botDot?.classList.remove('online');
-                botDot?.classList.add('offline');
-                if (botText) botText.textContent = 'Bot: Stopped';
+            if (botStatusElement) {
+                botStatusElement.textContent = status.bot ? 'Online' : 'Offline';
+                botStatusElement.parentElement?.classList.toggle('online', status.bot);
+                botStatusElement.parentElement?.classList.toggle('offline', !status.bot);
             }
         } catch (error) {
-            // If system status check fails, mark both as offline
-            serverDot?.classList.remove('online');
-            serverDot?.classList.add('offline');
-            botDot?.classList.remove('online');
-            botDot?.classList.add('offline');
-            if (serverText) serverText.textContent = 'Server: Error';
-            if (botText) botText.textContent = 'Bot: Error';
+            console.error('Failed to check system status:', error);
         }
     }
 
     private async loadInitialData(): Promise<void> {
-        await this.loadUsers();
+        await Promise.all([
+            this.panelsController.loadUsers(),
+            this.checkSystemStatus()
+        ]);
     }
 
-    private async loadUsers(): Promise<void> {
-        try {
-            this.usersList.showLoading();
-            const users = await this.apiClient.getUsers();
-            this.usersList.render(users);
-        } catch (error) {
-            console.error('Error loading users:', error);
-            this.usersList.showError(error instanceof Error ? error.message : 'Unknown error');
-        }
-    }
-
-
-    private async loadUserInterviews(userEmail: string): Promise<void> {
-        try {
-            const interviews = await this.apiClient.getInterviews(userEmail);
-            this.usersList.setUserInterviews(userEmail, interviews);
-        } catch (error) {
-            console.error('Error loading user interviews:', error);
-        }
-    }
-
-    private async openInterviewViewer(interviewId: string): Promise<void> {
-        try {
-            // Get all required data for the interview viewer
-            const interviews = await this.apiClient.getInterviews();
-            const interview = interviews.find(i => i.id === interviewId);
-            
-            if (!interview) {
-                console.error('Interview not found:', interviewId);
-                return;
-            }
-
-            const [messages, summary] = await Promise.all([
-                this.apiClient.getInterviewMessages(interviewId),
-                this.apiClient.getInterviewSummary(interviewId)
-            ]);
-
-            await this.interviewViewer.showInterview(interview, messages, summary);
-        } catch (error) {
-            console.error('Error opening interview viewer:', error);
-        }
+    private async refresh(): Promise<void> {
+        console.log('Refreshing data...');
+        await this.panelsController.refresh();
+        await this.checkSystemStatus();
     }
 }
 
-// Initialize the application when DOM is loaded
+// Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    new ControlPanel();
+    try {
+        new ControlPanel();
+        console.log('WLNX Control Panel initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize WLNX Control Panel:', error);
+    }
 });

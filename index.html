@@ -9,36 +9,76 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1>WLNX Control Panel</h1>
-            <div class="status-indicators">
-                <div class="status-indicator">
-                    <span id="server-status" class="status-dot offline"></span>
-                    <span id="server-status-text">Server: Connecting...</span>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1> WLNX Control Panel</h1>
+                    <p>Manage interviews and view user history</p>
                 </div>
-                <div class="status-indicator">
-                    <span id="bot-status" class="status-dot offline"></span>
-                    <span id="bot-status-text">Bot: Checking...</span>
+                <div class="header-right">
+                    <button class="refresh-btn" id="refresh-btn"> Refresh</button>
+                    <div class="status-indicators">
+                        <div class="status-item" id="server-status">
+                            <span class="status-dot server"></span>
+                            <span>Server: <span id="server-status-text">Checking...</span></span>
+                        </div>
+                        <div class="status-item" id="bot-status">
+                            <span class="status-dot bot"></span>
+                            <span>Bot: <span id="bot-status-text">Checking...</span></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
 
         <main class="main-content">
-            <div class="content">
-                <div class="section-header">
-                    <div class="header-text">
-                        <h2>Interview Dashboard</h2>
-                        <p class="header-subtitle">Manage interviews and view user history</p>
+            <div class="panels-container">
+                <!-- Panel 1: Users List -->
+                <div class="panel users-panel active" id="users-panel">
+                    <div class="panel-header">
+                        <h2> Users</h2>
                     </div>
-                    <div class="header-actions">
-                        <button id="refresh-users" class="refresh-btn">
-                            <span class="btn-icon">🔄</span>
-                            <span>Refresh</span>
-                        </button>
+                    <div class="panel-content">
+                        <div id="users-list" class="users-container">
+                            <div class="loading">Loading users...</div>
+                        </div>
                     </div>
                 </div>
-                
-                <div id="users-list" class="users-grid">
-                    <div class="loading">Loading users...</div>
+
+                <!-- Panel 2: User Sessions -->
+                <div class="panel sessions-panel" id="sessions-panel">
+                    <div class="panel-header">
+                        <button class="close-panel-btn" id="close-sessions">✕</button>
+                        <h2> Sessions</h2>
+                        <span class="panel-subtitle" id="selected-user-name"></span>
+                    </div>
+                    <div class="panel-content">
+                        <div id="sessions-list" class="sessions-container">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 3: Session Details -->
+                <div class="panel details-panel" id="details-panel">
+                    <div class="panel-header">
+                        <button class="close-panel-btn" id="close-details">✕</button>
+                        <h2> Session Details</h2>
+                        <span class="panel-subtitle" id="selected-session-id"></span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="details-container">
+                            <!-- Summary Section -->
+                            <div class="summary-section" id="summary-section">
+                                <h3> Summary</h3>
+                                <div id="summary-content"></div>
+                            </div>
+                            
+                            <!-- Transcript Section -->
+                            <div class="transcript-section" id="transcript-section">
+                                <h3> Transcript</h3>
+                                <div id="transcript-content"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
