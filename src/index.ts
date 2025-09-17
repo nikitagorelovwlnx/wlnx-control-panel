@@ -21,8 +21,16 @@ class ControlPanel {
 
     private async init(): Promise<void> {
         this.setupEventListeners();
-        await this.checkApiConnection();
+        await this.checkSystemStatus();
         await this.loadInitialData();
+        this.startStatusPolling();
+    }
+
+    private startStatusPolling(): void {
+        // Check status every 5 seconds
+        setInterval(async () => {
+            await this.checkSystemStatus();
+        }, 5000);
     }
 
     private setupEventListeners(): void {
@@ -78,24 +86,44 @@ class ControlPanel {
         }
     }
 
-    private async checkApiConnection(): Promise<void> {
-        const statusDot = document.getElementById('api-status');
-        const statusText = document.getElementById('api-status-text');
+    private async checkSystemStatus(): Promise<void> {
+        const serverDot = document.getElementById('server-status');
+        const serverText = document.getElementById('server-status-text');
+        const botDot = document.getElementById('bot-status');
+        const botText = document.getElementById('bot-status-text');
         
         try {
-            const isConnected = await this.apiClient.checkConnection();
-            if (isConnected) {
-                statusDot?.classList.remove('offline');
-                statusDot?.classList.add('online');
-                if (statusText) statusText.textContent = 'Connected';
+            const status = await this.apiClient.getSystemStatus();
+            
+            // Update server status
+            if (status.server) {
+                serverDot?.classList.remove('offline');
+                serverDot?.classList.add('online');
+                if (serverText) serverText.textContent = 'Server: Connected';
             } else {
-                throw new Error('Connection failed');
+                serverDot?.classList.remove('online');
+                serverDot?.classList.add('offline');
+                if (serverText) serverText.textContent = 'Server: Disconnected';
+            }
+            
+            // Update bot status
+            if (status.bot) {
+                botDot?.classList.remove('offline');
+                botDot?.classList.add('online');
+                if (botText) botText.textContent = 'Bot: Running';
+            } else {
+                botDot?.classList.remove('online');
+                botDot?.classList.add('offline');
+                if (botText) botText.textContent = 'Bot: Stopped';
             }
         } catch (error) {
-            statusDot?.classList.remove('online');
-            statusDot?.classList.add('offline');
-            if (statusText) statusText.textContent = 'Disconnected';
-            console.warn('API connection failed:', error);
+            // If system status check fails, mark both as offline
+            serverDot?.classList.remove('online');
+            serverDot?.classList.add('offline');
+            botDot?.classList.remove('online');
+            botDot?.classList.add('offline');
+            if (serverText) serverText.textContent = 'Server: Error';
+            if (botText) botText.textContent = 'Bot: Error';
         }
     }
 
@@ -122,8 +150,8 @@ class ControlPanel {
             const interviews = await this.apiClient.getInterviews();
             const interviewData = interviews.map(interview => ({
                 id: interview.id,
-                title: interview.title || `Interview ${interview.id}`,
-                userId: interview.userId
+                title: `Interview ${interview.id}`,
+                userId: interview.email
             }));
             
             this.chatView.populateInterviewSelect(interviewData);

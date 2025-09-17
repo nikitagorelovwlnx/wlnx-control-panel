@@ -18,17 +18,25 @@ export class UsersList {
     }
 
     private createUserCard(user: User): string {
-        const lastActivity = user.lastActivity 
-            ? new Date(user.lastActivity).toLocaleDateString() 
+        const lastInterview = user.last_interview 
+            ? new Date(user.last_interview).toLocaleDateString() 
+            : 'Never';
+        
+        const firstInterview = user.first_interview 
+            ? new Date(user.first_interview).toLocaleDateString() 
             : 'Never';
 
+        const status = user.interview_count > 0 ? 'active' : 'inactive';
+
         return `
-            <div class="user-card" data-user-id="${user.id}">
-                <div class="user-name">${this.escapeHtml(user.name)}</div>
+            <div class="user-card" data-user-email="${this.escapeHtml(user.email)}">
+                <div class="user-name">${this.escapeHtml(user.email.split('@')[0])}</div>
                 <div class="user-email">${this.escapeHtml(user.email)}</div>
-                <div class="user-status ${user.status}">${user.status}</div>
+                <div class="user-status ${status}">${status}</div>
                 <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">
-                    Last activity: ${lastActivity}
+                    Interviews: ${user.interview_count}<br>
+                    Last interview: ${lastInterview}<br>
+                    First interview: ${firstInterview}
                 </div>
             </div>
         `;
