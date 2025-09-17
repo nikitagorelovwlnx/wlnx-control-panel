@@ -2,6 +2,7 @@ import { User, Interview } from '../types/api.js';
 import { UsersList } from './UsersList.js';
 import { SessionsList } from './SessionsList.js';
 import { SessionDetails } from './SessionDetails.js';
+import { PanelResizer } from './PanelResizer.js';
 import { ApiClient } from '../api/client.js';
 
 export class PanelsController {
@@ -11,6 +12,7 @@ export class PanelsController {
     private usersList: UsersList;
     private sessionsList: SessionsList;
     private sessionDetails: SessionDetails;
+    private panelResizer: PanelResizer;
     
     private apiClient: ApiClient;
     private currentUser: User | null = null;
@@ -32,6 +34,7 @@ export class PanelsController {
         this.usersList = new UsersList(usersContainer.id);
         this.sessionsList = new SessionsList(sessionsContainer);
         this.sessionDetails = new SessionDetails(summaryContainer, transcriptContainer);
+        this.panelResizer = new PanelResizer(document.getElementById('panels-container')!);
         
         this.setupEventHandlers();
     }
@@ -108,6 +111,9 @@ export class PanelsController {
             // Show sessions panel
             this.sessionsPanel.classList.add('active');
             
+            // Show resizers
+            this.panelResizer.showResizers();
+            
             // Load sessions
             this.sessionsList.showLoading();
             const sessions = await this.apiClient.getInterviews(userEmail);
@@ -141,6 +147,9 @@ export class PanelsController {
             // Show details panel
             this.detailsPanel.classList.add('active');
             
+            // Update resizers
+            this.panelResizer.showResizers();
+            
             // Load session details
             this.sessionDetails.showLoading();
             this.sessionDetails.showSession(this.currentSession);
@@ -155,6 +164,9 @@ export class PanelsController {
         this.sessionsPanel.classList.remove('active');
         this.currentUser = null;
         
+        // Reset panel sizes and hide resizers
+        this.panelResizer.resetPanelSizes();
+        
         // Also close details panel if open
         this.closeDetailsPanel();
     }
@@ -163,6 +175,9 @@ export class PanelsController {
         this.detailsPanel.classList.remove('active');
         this.currentSession = null;
         this.sessionDetails.clear();
+        
+        // Update resizers visibility
+        this.panelResizer.showResizers();
     }
 
     // Public methods for external control

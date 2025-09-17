@@ -31,11 +31,11 @@
         </header>
 
         <main class="main-content">
-            <div class="panels-container">
+            <div class="panels-container" id="panels-container">
                 <!-- Panel 1: Users List -->
                 <div class="panel users-panel active" id="users-panel">
                     <div class="panel-header">
-                        <h2> Users</h2>
+                        <h2>👥 Users</h2>
                     </div>
                     <div class="panel-content">
                         <div id="users-list" class="users-container">
@@ -44,11 +44,16 @@
                     </div>
                 </div>
 
+                <!-- Resizer 1 -->
+                <div class="panel-resizer" id="resizer-1" data-direction="horizontal">
+                    <div class="resizer-handle"></div>
+                </div>
+
                 <!-- Panel 2: User Sessions -->
                 <div class="panel sessions-panel" id="sessions-panel">
                     <div class="panel-header">
                         <button class="close-panel-btn" id="close-sessions">✕</button>
-                        <h2> Sessions</h2>
+                        <h2>📋 Sessions</h2>
                         <span class="panel-subtitle" id="selected-user-name"></span>
                     </div>
                     <div class="panel-content">
@@ -57,24 +62,34 @@
                     </div>
                 </div>
 
+                <!-- Resizer 2 -->
+                <div class="panel-resizer" id="resizer-2" data-direction="horizontal">
+                    <div class="resizer-handle"></div>
+                </div>
+
                 <!-- Panel 3: Session Details -->
                 <div class="panel details-panel" id="details-panel">
                     <div class="panel-header">
                         <button class="close-panel-btn" id="close-details">✕</button>
-                        <h2> Session Details</h2>
+                        <h2>📄 Session Details</h2>
                         <span class="panel-subtitle" id="selected-session-id"></span>
                     </div>
                     <div class="panel-content">
                         <div class="details-container">
                             <!-- Summary Section -->
                             <div class="summary-section" id="summary-section">
-                                <h3> Summary</h3>
+                                <h3>📊 Summary</h3>
                                 <div id="summary-content"></div>
+                            </div>
+                            
+                            <!-- Vertical Resizer -->
+                            <div class="panel-resizer vertical" id="resizer-vertical" data-direction="vertical">
+                                <div class="resizer-handle"></div>
                             </div>
                             
                             <!-- Transcript Section -->
                             <div class="transcript-section" id="transcript-section">
-                                <h3> Transcript</h3>
+                                <h3>📝 Transcript</h3>
                                 <div id="transcript-content"></div>
                             </div>
                         </div>
