@@ -1,4 +1,4 @@
-import { User, ChatMessage, InterviewSummary, Interview, HealthResponse, PingResponse } from '../types/api.js';
+import { User, ChatMessage, InterviewSummary, Interview, HealthResponse } from '../types/api.js';
 
 export class ApiClient {
     private baseUrl: string;
@@ -121,12 +121,12 @@ export class ApiClient {
 
     async checkServerConnection(): Promise<boolean> {
         try {
-            // Use a simple ping endpoint for health check
-            const response = await this.makeRequest<PingResponse>('/ping');
+            // Use health endpoint as specified in API docs
+            const response = await this.makeRequest<HealthResponse>('/health');
             return response !== null;
         } catch (error) {
             try {
-                // Fallback to /api/users if ping doesn't exist
+                // Fallback to /api/users if health endpoint doesn't exist
                 await this.makeRequest<{users: User[]}>('/api/users');
                 return true;
             } catch (fallbackError) {
