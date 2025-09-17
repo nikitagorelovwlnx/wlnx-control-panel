@@ -1,20 +1,16 @@
 import { ApiClient } from './api/client.js';
 import { UsersList } from './components/UsersList.js';
-import { ChatView } from './components/ChatView.js';
-import { SummaryView } from './components/SummaryView.js';
+import { InterviewViewer } from './components/InterviewViewer.js';
 
 class ControlPanel {
     private apiClient: ApiClient;
     private usersList: UsersList;
-    private chatView: ChatView;
-    private summaryView: SummaryView;
-    private currentTab: string = 'users';
+    private interviewViewer: InterviewViewer;
 
     constructor() {
         this.apiClient = new ApiClient();
         this.usersList = new UsersList('users-list');
-        this.chatView = new ChatView('chat-messages', 'interview-select');
-        this.summaryView = new SummaryView('summary-content', 'summary-select');
+        this.interviewViewer = new InterviewViewer('interview-viewer');
         
         this.init();
     }
@@ -34,57 +30,24 @@ class ControlPanel {
     }
 
     private setupEventListeners(): void {
-        // Tab navigation
-        document.querySelectorAll('.nav-item').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const target = e.currentTarget as HTMLElement;
-                const tab = target.dataset.tab;
-                if (tab) {
-                    this.switchTab(tab);
-                }
-            });
-        });
-
         // Refresh users button
         const refreshButton = document.getElementById('refresh-users');
         refreshButton?.addEventListener('click', () => {
             this.loadUsers();
         });
 
-        // Interview selection handlers
-        this.chatView.onInterviewSelect((interviewId) => {
-            this.loadInterviewMessages(interviewId);
+        // User selection handler for loading their interviews
+        this.usersList.onUserSelect(async (userEmail) => {
+            await this.loadUserInterviews(userEmail);
         });
 
-        this.summaryView.onInterviewSelect((interviewId) => {
-            this.loadInterviewSummary(interviewId);
+        // Interview viewer integration
+        document.addEventListener('interviewSelected', async (e: any) => {
+            const interviewId = e.detail.interviewId;
+            await this.openInterviewViewer(interviewId);
         });
     }
 
-    private switchTab(tabName: string): void {
-        // Update navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
-
-        // Update content
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        document.getElementById(`${tabName}-tab`)?.classList.add('active');
-
-        this.currentTab = tabName;
-
-        // Load data for the active tab
-        if (tabName === 'users') {
-            this.loadUsers();
-        } else if (tabName === 'interviews') {
-            this.loadInterviews();
-        } else if (tabName === 'summaries') {
-            this.loadInterviews(); // Same data for dropdowns
-        }
-    }
 
     private async checkSystemStatus(): Promise<void> {
         const serverDot = document.getElementById('server-status');
@@ -129,12 +92,9 @@ class ControlPanel {
 
     private async loadInitialData(): Promise<void> {
         await this.loadUsers();
-        await this.loadInterviews();
     }
 
     private async loadUsers(): Promise<void> {
-        if (this.currentTab !== 'users') return;
-        
         try {
             this.usersList.showLoading();
             const users = await this.apiClient.getUsers();
@@ -145,42 +105,35 @@ class ControlPanel {
         }
     }
 
-    private async loadInterviews(): Promise<void> {
+
+    private async loadUserInterviews(userEmail: string): Promise<void> {
         try {
+            const interviews = await this.apiClient.getInterviews(userEmail);
+            this.usersList.setUserInterviews(userEmail, interviews);
+        } catch (error) {
+            console.error('Error loading user interviews:', error);
+        }
+    }
+
+    private async openInterviewViewer(interviewId: string): Promise<void> {
+        try {
+            // Get all required data for the interview viewer
             const interviews = await this.apiClient.getInterviews();
-            const interviewData = interviews.map(interview => ({
-                id: interview.id,
-                title: `Interview ${interview.id}`,
-                userId: interview.email
-            }));
+            const interview = interviews.find(i => i.id === interviewId);
             
-            this.chatView.populateInterviewSelect(interviewData);
-            this.summaryView.populateInterviewSelect(interviewData);
-        } catch (error) {
-            console.error('Error loading interviews:', error);
-            // Don't show error UI for interviews since they're used in dropdowns
-        }
-    }
+            if (!interview) {
+                console.error('Interview not found:', interviewId);
+                return;
+            }
 
-    private async loadInterviewMessages(interviewId: string): Promise<void> {
-        try {
-            this.chatView.showLoading();
-            const messages = await this.apiClient.getInterviewMessages(interviewId);
-            this.chatView.render(messages);
-        } catch (error) {
-            console.error('Error loading interview messages:', error);
-            this.chatView.showError(error instanceof Error ? error.message : 'Unknown error');
-        }
-    }
+            const [messages, summary] = await Promise.all([
+                this.apiClient.getInterviewMessages(interviewId),
+                this.apiClient.getInterviewSummary(interviewId)
+            ]);
 
-    private async loadInterviewSummary(interviewId: string): Promise<void> {
-        try {
-            this.summaryView.showLoading();
-            const summary = await this.apiClient.getInterviewSummary(interviewId);
-            this.summaryView.render(summary);
+            await this.interviewViewer.showInterview(interview, messages, summary);
         } catch (error) {
-            console.error('Error loading interview summary:', error);
-            this.summaryView.showError(error instanceof Error ? error.message : 'Unknown error');
+            console.error('Error opening interview viewer:', error);
         }
     }
 }
