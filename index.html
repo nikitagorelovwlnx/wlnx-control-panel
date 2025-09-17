@@ -4,19 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WLNX Control Panel</title>
-    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/modern.css">
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <header class="header">
             <div class="header-content">
                 <div class="header-left">
-                    <h1> WLNX Control Panel</h1>
-                    <p>Manage interviews and view user history</p>
+                    <h1>🏥 WLNX Control Panel</h1>
+                    <p>AI-powered wellness coaching dashboard</p>
                 </div>
                 <div class="header-right">
-                    <button class="refresh-btn" id="refresh-btn"> Refresh</button>
-                    <div class="status-indicators">
+                    <div class="status-grid">
                         <div class="status-item" id="server-status">
                             <span class="status-dot server"></span>
                             <span>Server: <span id="server-status-text">Checking...</span></span>
@@ -26,6 +25,7 @@
                             <span>Bot: <span id="bot-status-text">Checking...</span></span>
                         </div>
                     </div>
+                    <button class="refresh-btn" id="refresh-btn"> Refresh</button>
                 </div>
             </div>
         </header>
@@ -35,7 +35,7 @@
                 <!-- Panel 1: Users List -->
                 <div class="panel users-panel active" id="users-panel">
                     <div class="panel-header">
-                        <h2>👥 Users</h2>
+                        <h2>🧑‍⚕️ Patients</h2>
                     </div>
                     <div class="panel-content">
                         <div id="users-list" class="users-container">
@@ -53,7 +53,7 @@
                 <div class="panel sessions-panel" id="sessions-panel">
                     <div class="panel-header">
                         <button class="close-panel-btn" id="close-sessions">✕</button>
-                        <h2>📋 Sessions</h2>
+                        <h2>💬 Sessions</h2>
                         <span class="panel-subtitle" id="selected-user-name"></span>
                     </div>
                     <div class="panel-content">
@@ -71,14 +71,14 @@
                 <div class="panel details-panel" id="details-panel">
                     <div class="panel-header">
                         <button class="close-panel-btn" id="close-details">✕</button>
-                        <h2>📄 Session Details</h2>
+                        <h2>📊 Session Details</h2>
                         <span class="panel-subtitle" id="selected-session-id"></span>
                     </div>
                     <div class="panel-content">
                         <div class="details-container">
                             <!-- Summary Section -->
                             <div class="summary-section" id="summary-section">
-                                <h3>📊 Summary</h3>
+                                <h3>🎯 Summary</h3>
                                 <div id="summary-content"></div>
                             </div>
                             
@@ -89,7 +89,7 @@
                             
                             <!-- Transcript Section -->
                             <div class="transcript-section" id="transcript-section">
-                                <h3>📝 Transcript</h3>
+                                <h3>💭 Transcript</h3>
                                 <div id="transcript-content"></div>
                             </div>
                         </div>

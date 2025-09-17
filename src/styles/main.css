@@ -1,65 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-    /* 2025 Neon Cyberpunk Palette */
-    --primary: #00D9FF;
-    --secondary: #FF0080;  
-    --accent: #B794F6;
-    --success: #00FF88;
-    --warning: #FFB800;
-    --error: #FF4757;
-    --info: #5B63D3;
+    /* Modern AI App Colors */
+    --primary: #6366f1;
+    --primary-hover: #5b63d3;
+    --secondary: #06b6d4;
+    --accent: #f59e0b;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
     
-    /* Neural Network Colors */
-    --neural-blue: #0066FF;
-    --neural-purple: #8B5CF6;
-    --neural-pink: #EC4899;
-    --neural-green: #10B981;
-    --neural-cyan: #06B6D4;
-    --neural-orange: #FF6B35;
+    /* Clean Backgrounds */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --surface: #ffffff;
+    --surface-hover: #f8fafc;
     
-    /* Dark Mode 2025 */
-    --bg-primary: #0A0A0F;
-    --bg-secondary: #141420;
-    --bg-tertiary: #1E1E2E;
-    --surface: #252537;
-    --surface-hover: #2D2D42;
+    /* Professional Text */
+    --text-primary: #0f1629;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+    --text-muted: #cbd5e1;
     
-    /* High Contrast Text */
-    --text-primary: #FFFFFF;
-    --text-secondary: #B4BCD0;
-    --text-tertiary: #6B7280;
-    --text-accent: var(--primary);
+    /* Modern Shadows */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     
-    /* Holographic Gradients */
-    --gradient-neural: linear-gradient(135deg, var(--neural-blue) 0%, var(--neural-purple) 50%, var(--neural-pink) 100%);
-    --gradient-cyber: linear-gradient(135deg, #00D9FF 0%, #B794F6 50%, #FF0080 100%);
-    --gradient-matrix: linear-gradient(135deg, #00FF88 0%, #00D9FF 50%, #8B5CF6 100%);
-    --gradient-ai: linear-gradient(135deg, #FF6B35 0%, #EC4899 50%, #8B5CF6 100%);
+    /* Borders */
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e1;
+    --border-dark: #94a3b8;
     
-    /* Neon Glows */
-    --glow-primary: 0 0 20px rgba(0, 217, 255, 0.3);
-    --glow-secondary: 0 0 20px rgba(255, 0, 128, 0.3);
-    --glow-success: 0 0 20px rgba(0, 255, 136, 0.3);
-    --glow-neural: 0 0 30px rgba(139, 92, 246, 0.4);
-    
-    /* 3D Morphic Shadows */
-    --shadow-morph-in: inset 8px 8px 16px rgba(0, 0, 0, 0.3), inset -8px -8px 16px rgba(255, 255, 255, 0.05);
-    --shadow-morph-out: 8px 8px 16px rgba(0, 0, 0, 0.4), -8px -8px 16px rgba(255, 255, 255, 0.02);
-    --shadow-neon: 0 0 40px rgba(0, 217, 255, 0.2), 0 0 80px rgba(0, 217, 255, 0.1);
-    
-    /* Futuristic Radius */
+    /* Radius */
     --radius-xs: 4px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --radius-xl: 32px;
-    --radius-full: 50%;
-    
-    /* Advanced Blur */
-    --blur-glass: blur(24px) saturate(180%);
-    --blur-frost: blur(40px) saturate(200%);
-    --blur-dream: blur(60px) saturate(250%);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
     
     /* Modern Radius Values */
     --radius: 16px;
@@ -84,33 +66,33 @@
     box-sizing: border-box;
 }
 
-/* 2025 Reset */
-*, *::before, *::after {
+/* Modern Reset */
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html {
+    font-size: 16px;
+}
+
 body {
-    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 400;
-    overflow-x: hidden;
     min-height: 100vh;
-    
-    /* Futuristic Background */
-    background-image: 
-        radial-gradient(circle at 20% 80%, rgba(0, 217, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 0, 128, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-    
-    /* Enhanced Typography */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+}
+
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* iPhone 17 Liquid Glass Background */
@@ -189,34 +171,38 @@ body {
     100% { transform: translateY(-200px) rotate(360deg); }
 }
 
+/* Modern Header */
 .header {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-    backdrop-filter: var(--blur-glass);
-    border-bottom: 2px solid var(--primary);
-    box-shadow: var(--shadow-neon), var(--shadow-morph-out);
-    padding: 1.5rem 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 1rem 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-    margin: 0;
 }
 
 .header-content {
-    max-width: 1600px;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 2rem;
 }
 
+.header-left h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
 .header-left p {
     color: var(--text-secondary);
-    font-size: 1rem;
-    margin: 0.5rem 0 0 0;
-    opacity: 0.9;
-    font-weight: 500;
+    font-size: 0.875rem;
+    margin: 0.25rem 0 0 0;
+    font-weight: 400;
 }
 
 .header h1 {
