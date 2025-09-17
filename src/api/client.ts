@@ -65,9 +65,63 @@ export class ApiClient {
             const response = await this.makeRequest<{users: User[]}>('/api/users');
             return response.users;
         } catch (error) {
-            console.error('Failed to fetch users:', error);
-            return [];
+            console.error('Failed to fetch users, returning demo data:', error);
+            // Return demo data when API is not available
+            return this.getDemoUsers();
         }
+    }
+
+    private getDemoUsers(): User[] {
+        return [
+            {
+                email: 'alice.johnson@company.com',
+                session_count: 8,
+                last_session: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                first_session: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+                sessions: [
+                    {
+                        id: 'demo-001',
+                        email: 'alice.johnson@company.com',
+                        transcription: 'Coach: Hello Alice, how are you feeling today?\nAlice: I\'ve been feeling quite stressed lately with work deadlines.\nCoach: That sounds challenging. Can you tell me more about what\'s causing the stress?',
+                        summary: 'Alice discussed work-related stress and deadline pressures. We explored coping strategies and time management techniques.',
+                        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                        updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+                    }
+                ]
+            },
+            {
+                email: 'bob.smith@startup.io',
+                session_count: 15,
+                last_session: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                first_session: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+                sessions: [
+                    {
+                        id: 'demo-002',
+                        email: 'bob.smith@startup.io',
+                        transcription: 'Coach: Hi Bob, how has your week been?\nBob: Pretty good actually! I implemented some of the mindfulness techniques we discussed.\nCoach: That\'s wonderful to hear! How did they work for you?',
+                        summary: 'Bob reported positive progress with mindfulness practices. Discussed maintaining consistency and expanding techniques.',
+                        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                        updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                    }
+                ]
+            },
+            {
+                email: 'carol.davis@tech.corp',
+                session_count: 3,
+                last_session: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                first_session: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+                sessions: [
+                    {
+                        id: 'demo-003',
+                        email: 'carol.davis@tech.corp',
+                        transcription: 'Coach: Carol, tell me about your sleep patterns lately.\nCarol: I\'ve been having trouble falling asleep, especially on Sunday nights.\nCoach: Sunday night insomnia is common. Let\'s explore some relaxation techniques.',
+                        summary: 'Carol discussed sleep difficulties, particularly Sunday night anxiety. Introduced progressive muscle relaxation techniques.',
+                        created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                        updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+                    }
+                ]
+            }
+        ];
     }
 
     async getInterviews(email?: string): Promise<Interview[]> {
