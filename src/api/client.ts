@@ -1,4 +1,4 @@
-import { User, ChatMessage, InterviewSummary, Interview } from '../types/api.js';
+import { User, ChatMessage, InterviewSummary, Interview, HealthResponse, PingResponse } from '../types/api.js';
 
 export class ApiClient {
     private baseUrl: string;
@@ -121,30 +121,112 @@ export class ApiClient {
 
     async checkServerConnection(): Promise<boolean> {
         try {
-            // Use /api/users as health check since it doesn't require parameters
-            await this.makeRequest('/api/users');
-            return true;
+            // Use a simple ping endpoint for health check
+            const response = await this.makeRequest<PingResponse>('/ping');
+            return response !== null;
         } catch (error) {
-            return false;
+            try {
+                // Fallback to /api/users if ping doesn't exist
+                await this.makeRequest<{users: User[]}>('/api/users');
+                return true;
+            } catch (fallbackError) {
+                return false;
+            }
         }
     }
 
     async checkBotStatus(): Promise<boolean> {
         try {
-            // Check if bot endpoint exists, if not assume server handles bot functionality
-            await this.makeRequest('/api/bot/status');
-            return true;
+            // Check bot health endpoint
+            const response = await this.makeRequest<HealthResponse>('/health');
+            return response && (response.status === 'healthy' || response.status === 'degraded');
         } catch (error) {
-            // If bot endpoint doesn't exist, check if server is running (assume bot is integrated)
-            return await this.checkServerConnection();
+            try {
+                // Fallback to simple bot status check
+                await this.makeRequest<any>('/api/bot/status');
+                return true;
+            } catch (fallbackError) {
+                // If no specific bot endpoints, assume bot is part of the server
+                return await this.checkServerConnection();
+            }
+        }
+    }
+
+    async getDetailedHealthStatus(): Promise<{
+        server: { status: 'up' | 'down', responseTime?: number };
+        bot: { status: 'up' | 'down' | 'degraded', responseTime?: number };
+        overall: 'healthy' | 'degraded' | 'unhealthy';
+    }> {
+        const serverStartTime = Date.now();
+        const botStartTime = Date.now();
+
+        const [serverStatus, botResponse] = await Promise.allSettled([
+            this.checkServerConnection(),
+            this.getBotHealthDetails()
+        ]);
+
+        const serverResult = {
+            status: serverStatus.status === 'fulfilled' && serverStatus.value ? 'up' as const : 'down' as const,
+            responseTime: serverStatus.status === 'fulfilled' ? Date.now() - serverStartTime : undefined
+        };
+
+        const botResult = botResponse.status === 'fulfilled' 
+            ? botResponse.value 
+            : { status: 'down' as const, responseTime: Date.now() - botStartTime };
+
+        // Calculate overall status
+        let overall: 'healthy' | 'degraded' | 'unhealthy';
+        if (serverResult.status === 'up' && botResult.status === 'up') {
+            overall = 'healthy';
+        } else if (serverResult.status === 'up' || botResult.status === 'up' || botResult.status === 'degraded') {
+            overall = 'degraded';
+        } else {
+            overall = 'unhealthy';
+        }
+
+        return {
+            server: serverResult,
+            bot: botResult,
+            overall
+        };
+    }
+
+    private async getBotHealthDetails(): Promise<{ status: 'up' | 'down' | 'degraded', responseTime?: number }> {
+        const startTime = Date.now();
+        
+        try {
+            // Try to get detailed health status from bot
+            const response = await this.makeRequest<HealthResponse>('/health');
+            const responseTime = Date.now() - startTime;
+            
+            if (response && response.status) {
+                return {
+                    status: response.status === 'healthy' ? 'up' : 
+                           response.status === 'degraded' ? 'degraded' : 'down',
+                    responseTime
+                };
+            }
+            
+            // Fallback to simple bot check
+            const isUp = await this.checkBotStatus();
+            return {
+                status: isUp ? 'up' : 'down',
+                responseTime: Date.now() - startTime
+            };
+        } catch (error) {
+            return {
+                status: 'down',
+                responseTime: Date.now() - startTime
+            };
         }
     }
 
     async getSystemStatus(): Promise<{server: boolean, bot: boolean}> {
-        const [server, bot] = await Promise.all([
-            this.checkServerConnection(),
-            this.checkBotStatus()
-        ]);
-        return { server, bot };
+        const healthStatus = await this.getDetailedHealthStatus();
+        
+        return { 
+            server: healthStatus.server.status === 'up',
+            bot: healthStatus.bot.status === 'up' || healthStatus.bot.status === 'degraded'
+        };
     }
 }

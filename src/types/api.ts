@@ -49,3 +49,20 @@ export interface ApiError {
     code?: string;
     timestamp: string;
 }
+
+export interface HealthResponse {
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    timestamp?: string;
+    uptime?: number;
+    version?: string;
+    services?: {
+        openai?: { status: string };
+        api?: { status: string };
+        telegram?: { status: string };
+    };
+}
+
+export interface PingResponse {
+    status: 'ok';
+    timestamp: string;
+}
