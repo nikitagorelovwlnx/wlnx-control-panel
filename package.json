@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc -w & live-server --port=3000 --host=localhost --entry-file=index.html",
-    "start": "live-server --port=3000 --host=localhost --entry-file=index.html",
+    "dev": "tsc -w & live-server --port=3001 --host=localhost --entry-file=index.html",
+    "start": "live-server --port=3001 --host=localhost --entry-file=index.html",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
