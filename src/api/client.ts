@@ -2,9 +2,11 @@ import { User, ChatMessage, InterviewSummary, Interview, HealthResponse } from '
 
 export class ApiClient {
     private baseUrl: string;
+    private botHealthUrl: string;
     
-    constructor(baseUrl: string = 'http://localhost:3000') {
+    constructor(baseUrl: string = 'http://localhost:3000', botHealthUrl: string = 'http://localhost:3001') {
         this.baseUrl = baseUrl;
+        this.botHealthUrl = botHealthUrl;
     }
 
     private async makeRequest<T>(endpoint: string): Promise<T> {
@@ -24,6 +26,27 @@ export class ApiClient {
             return data;
         } catch (error) {
             console.error(`API Error for ${endpoint}:`, error);
+            throw error;
+        }
+    }
+
+    private async makeBotHealthRequest<T>(endpoint: string): Promise<T> {
+        try {
+            const response = await fetch(`${this.botHealthUrl}${endpoint}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error(`Bot Health API Error for ${endpoint}:`, error);
             throw error;
         }
     }
@@ -137,17 +160,23 @@ export class ApiClient {
 
     async checkBotStatus(): Promise<boolean> {
         try {
-            // Check bot health endpoint
-            const response = await this.makeRequest<HealthResponse>('/health');
+            // Check bot health endpoint on port 3001 as per telegram bot docs
+            const response = await this.makeBotHealthRequest<HealthResponse>('/health');
             return response && (response.status === 'healthy' || response.status === 'degraded');
         } catch (error) {
             try {
-                // Fallback to simple bot status check
-                await this.makeRequest<any>('/api/bot/status');
+                // Fallback to /status endpoint
+                await this.makeBotHealthRequest<any>('/status');
                 return true;
             } catch (fallbackError) {
-                // If no specific bot endpoints, assume bot is part of the server
-                return await this.checkServerConnection();
+                try {
+                    // Final fallback to /ping endpoint
+                    await this.makeBotHealthRequest<any>('/ping');
+                    return true;
+                } catch (pingError) {
+                    console.warn('Bot health check failed on all endpoints (3001/health, 3001/status, 3001/ping)');
+                    return false;
+                }
             }
         }
     }
@@ -195,8 +224,8 @@ export class ApiClient {
         const startTime = Date.now();
         
         try {
-            // Try to get detailed health status from bot
-            const response = await this.makeRequest<HealthResponse>('/health');
+            // Try to get detailed health status from bot on port 3001
+            const response = await this.makeBotHealthRequest<HealthResponse>('/health');
             const responseTime = Date.now() - startTime;
             
             if (response && response.status) {
