@@ -53,14 +53,25 @@ export interface ApiError {
 
 export interface HealthResponse {
     status: 'healthy' | 'degraded' | 'unhealthy';
-    timestamp?: string;
-    uptime?: number;
-    version?: string;
-    services?: {
-        openai?: { status: string };
-        api?: { status: string };
-        telegram?: { status: string };
+    timestamp: string;
+    uptime: number;
+    version: string;
+    services: {
+        openai: ServiceStatus;
+        api: ServiceStatus;
+        telegram: ServiceStatus;
     };
+    memory: {
+        used: number;
+        total: number;
+        percentage: number;
+    };
+}
+
+export interface ServiceStatus {
+    status: 'up' | 'down' | 'unknown';
+    responseTime?: number;
+    error?: string;
 }
 
 export interface PingResponse {
