@@ -1,10 +1,10 @@
-import { User, ChatMessage, InterviewSummary, Interview, HealthResponse } from '../types/api.js';
+import { User, ChatMessage, InterviewSummary, Interview, HealthResponse, PingResponse } from '../types/api.js';
 
 export class ApiClient {
     private baseUrl: string;
     private botHealthUrl: string;
     
-    constructor(baseUrl: string = 'http://localhost:3000', botHealthUrl: string = 'http://localhost:3001') {
+    constructor(baseUrl: string = 'http://localhost:3000', botHealthUrl: string = 'http://localhost:3002') {
         this.baseUrl = baseUrl;
         this.botHealthUrl = botHealthUrl;
     }
@@ -169,19 +169,19 @@ export class ApiClient {
 
     async checkBotStatus(): Promise<boolean> {
         try {
-            // Check bot health endpoint on port 3001 as per telegram bot docs
+            // Check bot health endpoint on port 3002
             const response = await this.makeBotHealthRequest<HealthResponse>('/health');
             return response && (response.status === 'healthy' || response.status === 'degraded');
         } catch (error) {
             try {
-                // Fallback to /status endpoint
-                await this.makeBotHealthRequest<any>('/status');
-                return true;
+                // Fallback to /status endpoint (same as /health according to bot API)
+                const statusResponse = await this.makeBotHealthRequest<HealthResponse>('/status');
+                return statusResponse && (statusResponse.status === 'healthy' || statusResponse.status === 'degraded');
             } catch (fallbackError) {
                 try {
                     // Final fallback to /ping endpoint
-                    await this.makeBotHealthRequest<any>('/ping');
-                    return true;
+                    const pingResponse = await this.makeBotHealthRequest<PingResponse>('/ping');
+                    return pingResponse.status === 'ok';
                 } catch (pingError) {
                     // Health check server is not running, but bot might still be working
                     // Check if we can infer bot status from API server
@@ -250,7 +250,7 @@ export class ApiClient {
         const startTime = Date.now();
         
         try {
-            // Try to get detailed health status from bot on port 3001
+            // Try to get detailed health status from bot on port 3002
             const response = await this.makeBotHealthRequest<HealthResponse>('/health');
             const responseTime = Date.now() - startTime;
             
