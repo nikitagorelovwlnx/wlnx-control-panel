@@ -10,11 +10,15 @@ export class SessionDetails {
     }
 
     showSession(session: Interview): void {
+        console.log('SessionDetails.showSession called with:', session);
         this.renderSummary(session);
         this.renderTranscript(session);
     }
 
     private renderSummary(session: Interview): void {
+        console.log('Rendering summary for session:', session.id);
+        console.log('Summary container:', this.summaryContainer);
+        
         const formattedDate = new Date(session.created_at).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
@@ -23,34 +27,30 @@ export class SessionDetails {
             minute: '2-digit'
         });
 
-        this.summaryContainer.innerHTML = `
+        const summaryHtml = `
             <div class="session-info">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">📅 Date</span>
-                        <span class="info-value">${formattedDate}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">👤 User</span>
-                        <span class="info-value">${this.escapeHtml(session.email)}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">🆔 Session ID</span>
-                        <span class="info-value">#${session.id.substring(0, 12)}</span>
-                    </div>
-                </div>
+                <p><strong>📅 Date:</strong> ${formattedDate}</p>
+                <p><strong>👤 User:</strong> ${this.escapeHtml(session.email)}</p>
+                <p><strong>🆔 Session ID:</strong> #${session.id.substring(0, 12)}</p>
             </div>
             
             <div class="summary-content">
                 <h4>📊 Summary</h4>
                 <div class="summary-text">
-                    ${this.formatText(session.summary)}
+                    <p>${this.escapeHtml(session.summary || 'No summary available.')}</p>
                 </div>
             </div>
         `;
+        
+        console.log('Setting summary HTML:', summaryHtml);
+        this.summaryContainer.innerHTML = summaryHtml;
     }
 
     private renderTranscript(session: Interview): void {
+        console.log('Rendering transcript for session:', session.id);
+        console.log('Transcript container:', this.transcriptContainer);
+        console.log('Transcription content:', session.transcription);
+        
         if (!session.transcription || session.transcription.trim() === '') {
             this.transcriptContainer.innerHTML = `
                 <div class="empty-state">
@@ -61,43 +61,18 @@ export class SessionDetails {
             return;
         }
 
-        this.transcriptContainer.innerHTML = `
+        const transcriptHtml = `
             <div class="transcript-content">
-                ${this.formatTranscript(session.transcription)}
+                <div class="transcript-text">
+                    <pre style="white-space: pre-wrap; font-family: inherit;">${this.escapeHtml(session.transcription)}</pre>
+                </div>
             </div>
         `;
-    }
-
-    private formatTranscript(transcription: string): string {
-        // Basic formatting for transcripts
-        // Split by common patterns and format as dialogue
-        const lines = transcription.split('\n').filter(line => line.trim() !== '');
         
-        return lines.map(line => {
-            const trimmedLine = line.trim();
-            
-            // Check if line looks like a speaker label
-            if (trimmedLine.match(/^(Coach|Client|User|Interviewer|Candidate):/i)) {
-                const [speaker, ...content] = trimmedLine.split(':');
-                return `
-                    <div class="transcript-exchange">
-                        <div class="speaker-label">${this.escapeHtml(speaker.trim())}:</div>
-                        <div class="speaker-content">${this.escapeHtml(content.join(':').trim())}</div>
-                    </div>
-                `;
-            }
-            
-            // Regular text
-            return `<div class="transcript-text">${this.escapeHtml(trimmedLine)}</div>`;
-        }).join('');
+        console.log('Setting transcript HTML:', transcriptHtml);
+        this.transcriptContainer.innerHTML = transcriptHtml;
     }
 
-    private formatText(text: string): string {
-        // Basic text formatting - preserve line breaks and add paragraphs
-        return text.split('\n\n').map(paragraph => 
-            `<p>${this.escapeHtml(paragraph.trim())}</p>`
-        ).join('');
-    }
 
     showLoading(): void {
         this.summaryContainer.innerHTML = `
