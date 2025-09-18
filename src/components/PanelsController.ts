@@ -151,7 +151,7 @@ export class PanelsController {
             this.panelResizer.showResizers();
             
             // Load session details
-            this.sessionDetails.showLoading();
+            console.log('About to show session details for:', this.currentSession);
             this.sessionDetails.showSession(this.currentSession);
             
         } catch (error) {
