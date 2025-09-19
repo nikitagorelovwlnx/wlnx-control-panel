@@ -17,6 +17,11 @@ export class WellnessForm {
     }
 
     private renderEmptyState(): void {
+        if (!this.container) {
+            console.warn('WellnessForm: Container not found');
+            return;
+        }
+        
         this.container.innerHTML = `
             <div class="empty-state">
                 <h3>No wellness data</h3>
@@ -26,6 +31,11 @@ export class WellnessForm {
     }
 
     private renderForm(data: WellnessData): void {
+        if (!this.container) {
+            console.warn('WellnessForm: Container not found');
+            return;
+        }
+        
         const formHtml = `
             <div class="wellness-form">
                 <div class="form-section">

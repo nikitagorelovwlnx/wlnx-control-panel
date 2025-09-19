@@ -7,15 +7,36 @@
     "build": "tsc",
     "dev": "tsc -w & live-server --port=3001 --host=localhost --entry-file=index.html",
     "start": "live-server --port=3001 --host=localhost --entry-file=index.html",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:user-management": "jest tests/functional/user-management.test.ts",
+    "test:session-management": "jest tests/functional/session-management.test.ts",
+    "test:delete-all": "jest tests/functional/delete-all-sessions.test.ts",
+    "test:error-handling": "jest tests/functional/error-handling.test.ts",
+    "test:navigation": "jest tests/functional/panel-navigation.test.ts"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.8.0",
+    "jest": "^30.1.3",
+    "jest-environment-jsdom": "^30.1.2",
     "live-server": "^1.2.2",
-    "@types/node": "^20.8.0"
+    "msw": "^2.11.2",
+    "text-encoding": "^0.7.0",
+    "ts-jest": "^29.4.3",
+    "typescript": "^5.2.2",
+    "whatwg-fetch": "^3.6.20"
   },
-  "dependencies": {},
-  "keywords": ["typescript", "browser", "api", "dashboard"],
+  "keywords": [
+    "typescript",
+    "browser",
+    "api",
+    "dashboard"
+  ],
   "author": "Nikita Gorelov",
   "license": "MIT"
 }
