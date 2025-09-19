@@ -11,6 +11,13 @@ export class SessionDetails {
 
     showSession(session: Interview): void {
         console.log('SessionDetails.showSession called with:', session);
+        console.log('Session object keys:', Object.keys(session));
+        console.log('Session.transcription:', session.transcription);
+        console.log('Session.transcript:', (session as any).transcript);
+        console.log('Session.messages:', (session as any).messages);
+        console.log('Session.content:', (session as any).content);
+        console.log('Full session data:', JSON.stringify(session, null, 2));
+        
         this.renderSummary(session);
         this.renderTranscript(session);
     }
@@ -27,15 +34,17 @@ export class SessionDetails {
             minute: '2-digit'
         });
 
+        const userEmail = (session as any).user_id || session.email || 'Unknown user';
+        
         const summaryHtml = `
             <div class="session-info">
-                <p><strong>📅 Date:</strong> ${formattedDate}</p>
-                <p><strong>👤 User:</strong> ${this.escapeHtml(session.email)}</p>
-                <p><strong>🆔 Session ID:</strong> #${session.id.substring(0, 12)}</p>
+                <p><strong>Date:</strong> ${formattedDate}</p>
+                <p><strong>User:</strong> ${this.escapeHtml(userEmail)}</p>
+                <p><strong>Session ID:</strong> #${session.id.substring(0, 12)}</p>
             </div>
             
             <div class="summary-content">
-                <h4>📊 Summary</h4>
+                <h4>Summary</h4>
                 <div class="summary-text">
                     <p>${this.escapeHtml(session.summary || 'No summary available.')}</p>
                 </div>
@@ -49,28 +58,56 @@ export class SessionDetails {
     private renderTranscript(session: Interview): void {
         console.log('Rendering transcript for session:', session.id);
         console.log('Transcript container:', this.transcriptContainer);
-        console.log('Transcription content:', session.transcription);
         
-        if (!session.transcription || session.transcription.trim() === '') {
+        // Try different field names
+        const transcriptionData = session.transcription || 
+                                 (session as any).transcript || 
+                                 (session as any).messages || 
+                                 (session as any).content ||
+                                 (session as any).conversation ||
+                                 (session as any).text;
+        
+        console.log('Found transcription data:', transcriptionData);
+        console.log('Transcription type:', typeof transcriptionData);
+        console.log('Transcription length:', transcriptionData?.length);
+        
+        if (!transcriptionData || (typeof transcriptionData === 'string' && transcriptionData.trim() === '')) {
             this.transcriptContainer.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">📝</div>
+                    <h3>No transcription</h3>
                     <p>No transcription available for this session.</p>
                 </div>
             `;
             return;
         }
 
+        // Convert transcription data to string if needed
+        let transcriptText = '';
+        if (typeof transcriptionData === 'string') {
+            transcriptText = transcriptionData;
+        } else if (Array.isArray(transcriptionData)) {
+            transcriptText = transcriptionData.map(item => {
+                if (typeof item === 'string') return item;
+                if (item.content) return item.content;
+                if (item.text) return item.text;
+                return JSON.stringify(item);
+            }).join('\n');
+        } else {
+            transcriptText = JSON.stringify(transcriptionData, null, 2);
+        }
+
         const transcriptHtml = `
             <div class="transcript-content">
                 <div class="transcript-text">
-                    <pre style="white-space: pre-wrap; font-family: inherit;">${this.escapeHtml(session.transcription)}</pre>
+                    <pre style="white-space: pre-wrap; font-family: inherit; font-size: 14px; line-height: 1.5; color: #1a1a1a;">${this.escapeHtml(transcriptText)}</pre>
                 </div>
             </div>
         `;
         
         console.log('Setting transcript HTML:', transcriptHtml);
+        console.log('Transcript HTML length:', transcriptHtml.length);
         this.transcriptContainer.innerHTML = transcriptHtml;
+        console.log('Transcript container after setting HTML:', this.transcriptContainer.innerHTML);
     }
 
 

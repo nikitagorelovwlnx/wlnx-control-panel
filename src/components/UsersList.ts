@@ -17,9 +17,8 @@ export class UsersList {
         if (users.length === 0) {
             this.container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">👥</div>
-                    <h3>No patients found</h3>
-                    <p>No wellness coaching patients are available.</p>
+                    <h3>No users found</h3>
+                    <p>No users are available.</p>
                 </div>
             `;
             return;

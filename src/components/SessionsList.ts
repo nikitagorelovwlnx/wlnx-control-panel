@@ -12,9 +12,8 @@ export class SessionsList {
         if (sessions.length === 0) {
             this.container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">📝</div>
                     <h3>No sessions yet</h3>
-                    <p>This user hasn't completed any wellness sessions.</p>
+                    <p>This user hasn't completed any sessions.</p>
                 </div>
             `;
             return;
