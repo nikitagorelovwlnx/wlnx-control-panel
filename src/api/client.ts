@@ -9,13 +9,14 @@ export class ApiClient {
         this.botHealthUrl = botHealthUrl;
     }
 
-    private async makeRequest<T>(endpoint: string): Promise<T> {
+    private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
         try {
             const response = await fetch(`${this.baseUrl}${endpoint}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                ...options
             });
 
             if (!response.ok) {
@@ -358,6 +359,54 @@ export class ApiClient {
             server: healthStatus.server.status === 'up',
             bot: healthStatus.bot.status === 'up' || healthStatus.bot.status === 'degraded'
         };
+    }
+
+    // Session deletion methods
+    async deleteSession(sessionId: string, userEmail?: string): Promise<boolean> {
+        if (!userEmail) {
+            console.warn('No userEmail provided for deletion');
+            return false;
+        }
+
+        console.log(`Deleting session ${sessionId} for user ${userEmail}`);
+        
+        try {
+            // Use the working variant: Body JSON
+            await this.makeRequest(`/api/interviews/${sessionId}`, {
+                method: 'DELETE',
+                body: JSON.stringify({ email: userEmail })
+            });
+            console.log(`✅ Session ${sessionId} deleted successfully`);
+            return true;
+        } catch (error) {
+            console.error('Failed to delete session:', error);
+            return false;
+        }
+    }
+
+    async deleteAllUserSessions(userEmail: string): Promise<{success: boolean, deletedCount: number}> {
+        try {
+            // Get user sessions first
+            const interviews = await this.getInterviews(userEmail);
+            let deletedCount = 0;
+            
+            // Delete each session
+            for (const interview of interviews) {
+                try {
+                    const success = await this.deleteSession(interview.id, userEmail);
+                    if (success) {
+                        deletedCount++;
+                    }
+                } catch (error) {
+                    console.error(`Failed to delete session ${interview.id}:`, error);
+                }
+            }
+            
+            return { success: true, deletedCount };
+        } catch (error) {
+            console.error('Failed to delete all user sessions:', error);
+            return { success: false, deletedCount: 0 };
+        }
     }
 
 }

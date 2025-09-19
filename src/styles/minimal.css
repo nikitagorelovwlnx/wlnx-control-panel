@@ -38,6 +38,9 @@
     --space-lg: 24px;
     --space-xl: 32px;
     
+    /* Layout */
+    --header-height: 80px;
+    
     /* Radius */
     --radius: 6px;
     --radius-lg: 8px;
@@ -58,8 +61,10 @@ body {
 
 .app-container {
     min-height: 100vh;
+    width: 100vw;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 /* Header */
@@ -145,14 +150,15 @@ body {
 .main-content {
     flex: 1;
     background: var(--bg-secondary);
-    padding: 0;
+    width: 100%;
+    overflow: hidden;
 }
 
 .panels-container {
     display: flex;
-    height: calc(100vh - 80px);
-    width: 100%;
-    margin: 0;
+    flex: 1;
+    width: 100vw;
+    height: calc(100vh - var(--header-height));
     overflow: hidden;
 }
 
@@ -196,10 +202,10 @@ body {
 
 /* Active panels use flex to fill remaining space */
 .panel.sessions-panel.active {
-    flex: 1;
+    flex: 0 0 350px;
     opacity: 1;
     min-width: 350px;
-    width: auto;
+    max-width: 500px;
 }
 
 .panel.details-panel.active {
@@ -209,13 +215,11 @@ body {
     width: auto;
 }
 
-/* When both sessions and details are open */
-.panel.sessions-panel.active + .panel-resizer + .panel.details-panel.active {
-    flex: 1.5;
-}
-
-.panel.sessions-panel.active:has(+ .panel-resizer + .panel.details-panel.active) {
-    flex: 1;
+/* Details panel should always fill remaining space */
+.panel.details-panel.active {
+    flex: 1 1 auto !important;
+    min-width: 400px !important;
+    width: auto !important;
 }
 
 /* Collapsed States */
@@ -298,6 +302,8 @@ body {
     align-items: center;
     justify-content: space-between;
     min-height: 56px;
+    flex-wrap: nowrap;
+    overflow: hidden;
 }
 
 .panel-header h2 {
@@ -311,6 +317,9 @@ body {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
     font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .close-panel-btn, .collapse-panel-btn {
@@ -334,10 +343,20 @@ body {
     color: var(--text-secondary);
 }
 
+.panel-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
 .panel-header-actions {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 /* Polling Indicator */
@@ -376,13 +395,15 @@ body {
 
 /* Users List */
 .users-container {
-    padding: var(--space-sm);
-    flex: 1;
     overflow-y: auto;
+    height: 100%;
 }
 
-.users-container::-webkit-scrollbar {
-    width: 6px;
+/* Custom Scrollbars */
+.users-container::-webkit-scrollbar,
+.sessions-container::-webkit-scrollbar,
+.tab-body::-webkit-scrollbar {
+    width: 4px;
 }
 
 .users-container::-webkit-scrollbar-track {
@@ -415,21 +436,58 @@ body {
 }
 
 .user-card.active, .user-card.selected {
-    border-color: var(--accent);
-    background: rgba(37, 99, 235, 0.05);
-    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.1);
+    background: rgba(37, 99, 235, 0.08);
+    border-left: 3px solid var(--accent);
 }
 
 .user-card.active .user-avatar, .user-card.selected .user-avatar {
     background: var(--accent);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .user-info {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-md);
     margin-bottom: var(--space-sm);
+}
+
+.user-info .user-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex: 1;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.delete-all-user-sessions-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.delete-all-user-sessions-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--error);
+}
+
+.delete-all-user-sessions-btn .delete-icon {
+    width: 14px;
+    height: 14px;
 }
 
 .user-avatar {
@@ -511,9 +569,8 @@ body {
 }
 
 .session-card.active, .session-card.selected {
-    border-color: var(--accent);
-    background: rgba(37, 99, 235, 0.05);
-    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.1);
+    background: rgba(37, 99, 235, 0.08);
+    border-left: 3px solid var(--accent);
 }
 
 .session-card.active .session-id, .session-card.selected .session-id {
@@ -526,6 +583,103 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--space-sm);
+}
+
+/* Session Actions */
+.session-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--error);
+}
+
+.delete-btn .delete-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.confirm-actions {
+    display: none;
+    align-items: center;
+    gap: var(--space-xs);
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-xs);
+    box-shadow: var(--shadow-sm);
+}
+
+.confirm-yes,
+.confirm-no {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: calc(var(--radius) - 1px);
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 32px;
+}
+
+.confirm-yes:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+}
+
+.confirm-no:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Delete All Button */
+.delete-all-btn {
+    background: none;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--error);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: var(--radius);
+    font-size: 11px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    margin-right: var(--space-xs);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.delete-all-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: var(--error);
+}
+
+.delete-all-btn svg {
+    width: 12px;
+    height: 12px;
 }
 
 .session-id {
@@ -593,6 +747,22 @@ body {
     border-bottom-color: var(--accent);
 }
 
+.tab-btn.has-updates {
+    position: relative;
+}
+
+.tab-btn.has-updates::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 6px;
+    height: 6px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
 /* Tab Content */
 .tab-content-container {
     flex: 1;
@@ -609,21 +779,16 @@ body {
     display: flex;
 }
 
-.tab-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-lg);
-    border-bottom: 1px solid var(--border-light);
-    background: var(--bg-tertiary);
+.tab-content.updating {
+    animation: contentUpdate 0.6s ease-in-out;
 }
 
-.tab-header h3 {
-    margin: 0;
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    color: var(--text-primary);
+@keyframes contentUpdate {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(37, 99, 235, 0.1); }
+    100% { background-color: transparent; }
 }
+
 
 .tab-body {
     flex: 1;
@@ -632,34 +797,6 @@ body {
     background: var(--bg-primary);
 }
 
-.collapse-tab-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 14px;
-    cursor: pointer;
-    padding: var(--space-xs);
-    border-radius: var(--radius);
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.collapse-tab-btn:hover {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-}
-
-/* Collapsed Tab State */
-.tab-content.collapsed .tab-body {
-    display: none;
-}
-
-.tab-content.collapsed .collapse-tab-btn {
-    transform: rotate(180deg);
-}
 
 /* Wellness Form */
 .wellness-form {

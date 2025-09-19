@@ -18,7 +18,9 @@ export class PanelsController {
     private currentUser: User | null = null;
     private currentSession: Interview | null = null;
     private pollingInterval: number | null = null;
+    private usersPollingInterval: number | null = null;
     private readonly POLLING_INTERVAL_MS = 5000; // 5 seconds
+    private readonly USERS_POLLING_INTERVAL_MS = 30000; // 30 seconds for users
 
     constructor(apiClient: ApiClient) {
         this.apiClient = apiClient;
@@ -32,7 +34,7 @@ export class PanelsController {
         const sessionsContainer = document.getElementById('sessions-list')!;
         const detailsContainer = document.querySelector('.details-container')!;
         this.sessionDetails = new SessionDetails(detailsContainer as HTMLElement);
-        this.sessionsList = new SessionsList(sessionsContainer);
+        this.sessionsList = new SessionsList(sessionsContainer, apiClient);
         this.usersList = new UsersList(usersContainer.id);
         this.panelResizer = new PanelResizer(document.getElementById('panels-container')!);
         
@@ -43,6 +45,11 @@ export class PanelsController {
         // User selection handler
         this.usersList.onUserSelect((userEmail: string) => {
             this.openUserSessions(userEmail);
+        });
+
+        // Delete all sessions handler
+        this.usersList.onDeleteAllSessions(async (userEmail: string) => {
+            await this.deleteAllUserSessions(userEmail);
         });
         
         // Session selection handler  
@@ -58,6 +65,7 @@ export class PanelsController {
         document.getElementById('close-details')?.addEventListener('click', () => {
             this.closeDetailsPanel();
         });
+
 
         // Collapse buttons
         document.getElementById('collapse-users')?.addEventListener('click', () => {
@@ -103,9 +111,12 @@ export class PanelsController {
             }
             
             this.usersList.render(users);
+            
+            // Start polling for users updates if not already started
+            this.startUsersPolling();
         } catch (error) {
             console.error('Failed to load users:', error);
-            this.usersList.showError(error instanceof Error ? error.message : 'Unknown error');
+            this.usersList.showError(error instanceof Error ? error.message : 'Failed to load users');
         }
     }
 
@@ -216,6 +227,100 @@ export class PanelsController {
         
         // Reload users
         await this.loadUsers();
+        
+        // Start polling for users updates
+        this.startUsersPolling();
+    }
+
+    private async deleteAllUserSessions(userEmail?: string): Promise<void> {
+        const emailToDelete = userEmail || this.currentUser?.email;
+        if (!emailToDelete) {
+            console.error('No user email available for deletion');
+            return;
+        }
+
+        try {
+            const result = await this.apiClient.deleteAllUserSessions(emailToDelete);
+            if (result.success) {
+                console.log(`Successfully deleted ${result.deletedCount} sessions for ${emailToDelete}`);
+                
+                // Refresh user data after deletion
+                await this.loadUsers();
+                
+                // Update the sessions panel to reflect changes if it's open for this user
+                if (this.isSessionsPanelOpen() && this.currentUser?.email === emailToDelete) {
+                    const sessions = await this.apiClient.getInterviews(emailToDelete);
+                    this.sessionsList.showSessions(sessions, emailToDelete);
+                }
+            } else {
+                console.error('Failed to delete all sessions');
+            }
+        } catch (error) {
+            console.error('Error deleting all sessions:', error);
+        }
+    }
+
+    private startUsersPolling(): void {
+        this.stopUsersPolling();
+        
+        console.log('Starting users polling');
+        
+        this.usersPollingInterval = window.setInterval(async () => {
+            await this.pollUsersForUpdates();
+        }, this.USERS_POLLING_INTERVAL_MS);
+    }
+
+    private stopUsersPolling(): void {
+        if (this.usersPollingInterval) {
+            console.log('Stopping users polling');
+            clearInterval(this.usersPollingInterval);
+            this.usersPollingInterval = null;
+        }
+    }
+
+    private async pollUsersForUpdates(): Promise<void> {
+        try {
+            console.log('Polling for users updates');
+            const users = await this.apiClient.getUsers();
+            
+            // Check if user list has changed
+            const currentUsers = this.usersList.getUsers();
+            const hasChanges = this.compareUserLists(currentUsers, users);
+            
+            if (hasChanges) {
+                console.log('Users list updated');
+                this.usersList.render(users);
+                
+                // If we have a current user selected, update their sessions too
+                if (this.currentUser) {
+                    const updatedUser = users.find(u => u.email === this.currentUser!.email);
+                    if (updatedUser) {
+                        this.currentUser = updatedUser;
+                        this.sessionsList.showSessions(updatedUser.sessions || [], updatedUser.email);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Users polling error:', error);
+        }
+    }
+
+    private compareUserLists(current: any[], updated: any[]): boolean {
+        if (current.length !== updated.length) return true;
+        
+        // Compare each user's session count and last session
+        for (let i = 0; i < current.length; i++) {
+            const curr = current[i];
+            const upd = updated[i];
+            
+            if (curr.email !== upd.email ||
+                curr.session_count !== upd.session_count ||
+                curr.last_session !== upd.last_session) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     public isSessionsPanelOpen(): boolean {
@@ -327,14 +432,16 @@ export class PanelsController {
                 return;
             }
 
-            // Check if summary or transcription has changed
+            // Check what changed
             const summaryChanged = updatedSession.summary !== this.currentSession.summary;
             const transcriptionChanged = updatedSession.transcription !== this.currentSession.transcription;
+            const wellnessChanged = JSON.stringify(updatedSession.wellness_data) !== JSON.stringify(this.currentSession.wellness_data);
             
-            if (summaryChanged || transcriptionChanged) {
+            if (summaryChanged || transcriptionChanged || wellnessChanged) {
                 console.log('Session updates detected:', {
                     summaryChanged,
-                    transcriptionChanged
+                    transcriptionChanged,
+                    wellnessChanged
                 });
                 
                 // Show update indicator
@@ -343,8 +450,12 @@ export class PanelsController {
                 // Update current session
                 this.currentSession = updatedSession;
                 
-                // Update the UI
-                this.sessionDetails.showSession(this.currentSession);
+                // Update only the specific content without changing tabs
+                this.sessionDetails.updateContent(this.currentSession, {
+                    summary: summaryChanged,
+                    transcript: transcriptionChanged,
+                    wellness: wellnessChanged
+                });
                 
                 // Hide update indicator after a brief moment
                 setTimeout(() => this.hideUpdateIndicator(), 2000);

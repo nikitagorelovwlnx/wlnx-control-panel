@@ -9,7 +9,6 @@ export class TabsController {
 
     private init(): void {
         this.bindTabEvents();
-        this.bindCollapseEvents();
     }
 
     private bindTabEvents(): void {
@@ -24,17 +23,6 @@ export class TabsController {
         });
     }
 
-    private bindCollapseEvents(): void {
-        const collapseBtns = this.container.querySelectorAll('.collapse-tab-btn');
-        collapseBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tabContent = (e.target as HTMLElement).closest('.tab-content');
-                if (tabContent) {
-                    this.toggleTabCollapse(tabContent as HTMLElement);
-                }
-            });
-        });
-    }
 
     public switchTab(tabName: string): void {
         // Update tab buttons
@@ -43,6 +31,8 @@ export class TabsController {
             btn.classList.remove('active');
             if (btn.getAttribute('data-tab') === tabName) {
                 btn.classList.add('active');
+                // Remove update indicator when switching to this tab
+                btn.classList.remove('has-updates');
             }
         });
 
@@ -60,18 +50,6 @@ export class TabsController {
         this.currentTab = tabName;
     }
 
-    private toggleTabCollapse(tabContent: HTMLElement): void {
-        const isCollapsed = tabContent.classList.contains('collapsed');
-        const collapseBtn = tabContent.querySelector('.collapse-tab-btn') as HTMLElement;
-        
-        if (isCollapsed) {
-            tabContent.classList.remove('collapsed');
-            if (collapseBtn) collapseBtn.textContent = '↑';
-        } else {
-            tabContent.classList.add('collapsed');
-            if (collapseBtn) collapseBtn.textContent = '↓';
-        }
-    }
 
     public getCurrentTab(): string {
         return this.currentTab;
