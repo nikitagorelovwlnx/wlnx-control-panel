@@ -79,32 +79,49 @@
                         <h2>Details</h2>
                         <span class="panel-subtitle" id="selected-session-id"></span>
                         <div class="panel-header-actions">
+                            <div class="polling-indicator" id="polling-indicator" title="Auto-updating every 5s">
+                                <div class="polling-dot"></div>
+                            </div>
                             <button class="close-panel-btn" id="close-details">✕</button>
                         </div>
                     </div>
                     <div class="panel-content">
                         <div class="details-container">
-                            <!-- Summary Section -->
-                            <div class="summary-section" id="summary-section">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <h3 style="margin: 0;">Summary</h3>
-                                    <button class="collapse-panel-btn" id="collapse-summary" title="Collapse">↑</button>
-                                </div>
-                                <div id="summary-content"></div>
+                            <!-- Tab Navigation -->
+                            <div class="details-tabs">
+                                <button class="tab-btn active" data-tab="summary">Summary</button>
+                                <button class="tab-btn" data-tab="transcript">Transcript</button>
+                                <button class="tab-btn" data-tab="wellness">Wellness</button>
                             </div>
                             
-                            <!-- Vertical Resizer -->
-                            <div class="panel-resizer vertical" id="resizer-vertical" data-direction="vertical">
-                                <div class="resizer-handle"></div>
-                            </div>
-                            
-                            <!-- Transcript Section -->
-                            <div class="transcript-section" id="transcript-section">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                    <h3 style="margin: 0;">Transcript</h3>
-                                    <button class="collapse-panel-btn" id="collapse-transcript" title="Collapse">↑</button>
+                            <!-- Tab Contents -->
+                            <div class="tab-content-container">
+                                <!-- Summary Tab -->
+                                <div class="tab-content active" id="tab-summary">
+                                    <div class="tab-header">
+                                        <h3>Summary</h3>
+                                        <button class="collapse-tab-btn" id="collapse-summary" title="Collapse">↑</button>
+                                    </div>
+                                    <div class="tab-body" id="summary-content"></div>
                                 </div>
-                                <div id="transcript-content"></div>
+                                
+                                <!-- Transcript Tab -->
+                                <div class="tab-content" id="tab-transcript">
+                                    <div class="tab-header">
+                                        <h3>Transcript</h3>
+                                        <button class="collapse-tab-btn" id="collapse-transcript" title="Collapse">↑</button>
+                                    </div>
+                                    <div class="tab-body" id="transcript-content"></div>
+                                </div>
+                                
+                                <!-- Wellness Tab -->
+                                <div class="tab-content" id="tab-wellness">
+                                    <div class="tab-header">
+                                        <h3>Wellness Data</h3>
+                                        <button class="collapse-tab-btn" id="collapse-wellness" title="Collapse">↑</button>
+                                    </div>
+                                    <div class="tab-body" id="wellness-content"></div>
+                                </div>
                             </div>
                         </div>
                     </div>

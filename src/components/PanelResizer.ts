@@ -123,20 +123,31 @@ export class PanelResizer {
 
         if (resizerId === 'resizer-1' && sessionsPanel.classList.contains('active')) {
             // Resize between users and sessions panels
-            const newUsersWidth = Math.max(200, Math.min(containerWidth - 400, this.startWidths[0] + deltaX));
-            const newSessionsWidth = containerWidth - newUsersWidth - (detailsPanel.classList.contains('active') ? this.startWidths[2] : 0);
-
-            usersPanel.style.width = `${newUsersWidth}px`;
-            sessionsPanel.style.width = `${newSessionsWidth}px`;
+            const newUsersWidth = Math.max(280, Math.min(containerWidth - 400, this.startWidths[0] + deltaX));
+            
+            // Update flex-basis for users panel
+            usersPanel.style.flexBasis = `${newUsersWidth}px`;
+            
+            // Sessions panel will automatically adjust due to flex: 1
 
         } else if (resizerId === 'resizer-2' && detailsPanel.classList.contains('active')) {
             // Resize between sessions and details panels
-            const activeWidth = containerWidth - (this.startWidths[2] || 0);
-            const newSessionsWidth = Math.max(200, Math.min(activeWidth - 200, this.startWidths[1] + deltaX));
-            const newDetailsWidth = containerWidth - this.startWidths[0] - newSessionsWidth;
-
-            sessionsPanel.style.width = `${newSessionsWidth}px`;
-            detailsPanel.style.width = `${newDetailsWidth}px`;
+            const usersWidth = usersPanel.offsetWidth;
+            const availableWidth = containerWidth - usersWidth - 8; // 8px for resizers
+            const sessionsPanelIndex = sessionsPanel.classList.contains('active') ? 1 : -1;
+            
+            if (sessionsPanelIndex >= 0) {
+                const newSessionsWidth = Math.max(300, Math.min(availableWidth - 400, this.startWidths[sessionsPanelIndex] + deltaX));
+                const newDetailsWidth = availableWidth - newSessionsWidth;
+                
+                // Update flex-basis for both panels
+                sessionsPanel.style.flexBasis = `${newSessionsWidth}px`;
+                detailsPanel.style.flexBasis = `${newDetailsWidth}px`;
+                
+                // Override flex-grow to maintain sizes
+                sessionsPanel.style.flexGrow = '0';
+                detailsPanel.style.flexGrow = '0';
+            }
         }
     }
 
@@ -217,10 +228,13 @@ export class PanelResizer {
         const summarySection = document.getElementById('summary-section') as HTMLElement;
         const transcriptSection = document.getElementById('transcript-section') as HTMLElement;
 
-        // Reset horizontal panel sizes
+        // Reset horizontal panel sizes (now using flex)
         [usersPanel, sessionsPanel, detailsPanel].forEach(panel => {
             if (panel) {
                 panel.style.width = '';
+                panel.style.flexBasis = '';
+                panel.style.flexGrow = '';
+                panel.style.flexShrink = '';
             }
         });
 

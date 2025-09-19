@@ -209,7 +209,7 @@ export class ApiClient {
             return {
                 id: `summary-${interviewId}`,
                 interviewId,
-                userId: interview.email,
+                userId: interview.email || interview.user_id || 'unknown',
                 summary: interview.summary,
                 keyPoints: [
                     'Transcription available',

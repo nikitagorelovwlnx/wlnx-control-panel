@@ -28,13 +28,26 @@ export interface InterviewSummary {
     createdAt: string;
 }
 
+export interface WellnessData {
+    age?: number;
+    weight?: number;
+    height?: number;
+    stress_level?: number;
+    sleep_hours?: number;
+    activity_level?: string;
+    goals?: string[];
+    [key: string]: any;
+}
+
 export interface Interview {
     id: string;
-    email: string;
-    transcription: string;
-    summary: string;
+    user_id?: string;
     created_at: string;
     updated_at: string;
+    transcription: string;
+    summary: string;
+    wellness_data?: WellnessData;
+    email?: string;
 }
 
 export interface ApiResponse<T> {
