@@ -63,6 +63,13 @@ export class UsersList {
                 const userEmail = card.getAttribute('data-user-email');
                 if (userEmail && this.onUserSelectCallback) {
                     console.log('User card clicked:', userEmail);
+                    
+                    // Remove active class from all cards
+                    userCards.forEach(c => c.classList.remove('active', 'selected'));
+                    
+                    // Add active class to clicked card
+                    card.classList.add('active', 'selected');
+                    
                     this.onUserSelectCallback(userEmail);
                 }
             });

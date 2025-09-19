@@ -48,17 +48,25 @@ class ControlPanel {
             
             const serverStatusElement = document.getElementById('server-status-text');
             const botStatusElement = document.getElementById('bot-status-text');
+            const serverDot = document.querySelector('#server-status .status-dot');
+            const botDot = document.querySelector('#bot-status .status-dot');
             
             if (serverStatusElement) {
                 serverStatusElement.textContent = status.server ? 'Online' : 'Offline';
-                serverStatusElement.parentElement?.classList.toggle('online', status.server);
-                serverStatusElement.parentElement?.classList.toggle('offline', !status.server);
+            }
+            
+            if (serverDot) {
+                serverDot.classList.toggle('online', status.server);
+                serverDot.classList.toggle('offline', !status.server);
             }
             
             if (botStatusElement) {
                 botStatusElement.textContent = status.bot ? 'Online' : 'Offline';
-                botStatusElement.parentElement?.classList.toggle('online', status.bot);
-                botStatusElement.parentElement?.classList.toggle('offline', !status.bot);
+            }
+            
+            if (botDot) {
+                botDot.classList.toggle('online', status.bot);
+                botDot.classList.toggle('offline', !status.bot);
             }
         } catch (error) {
             console.error('Failed to check system status:', error);

@@ -17,6 +17,8 @@ export class PanelsController {
     private apiClient: ApiClient;
     private currentUser: User | null = null;
     private currentSession: Interview | null = null;
+    private pollingInterval: number | null = null;
+    private readonly POLLING_INTERVAL_MS = 5000; // 5 seconds
 
     constructor(apiClient: ApiClient) {
         this.apiClient = apiClient;
@@ -28,12 +30,10 @@ export class PanelsController {
         // Initialize components
         const usersContainer = document.getElementById('users-list')!;
         const sessionsContainer = document.getElementById('sessions-list')!;
-        const summaryContainer = document.getElementById('summary-content')!;
-        const transcriptContainer = document.getElementById('transcript-content')!;
-        
-        this.usersList = new UsersList(usersContainer.id);
+        const detailsContainer = document.querySelector('.details-container')!;
+        this.sessionDetails = new SessionDetails(detailsContainer as HTMLElement);
         this.sessionsList = new SessionsList(sessionsContainer);
-        this.sessionDetails = new SessionDetails(summaryContainer, transcriptContainer);
+        this.usersList = new UsersList(usersContainer.id);
         this.panelResizer = new PanelResizer(document.getElementById('panels-container')!);
         
         this.setupEventHandlers();
@@ -173,6 +173,9 @@ export class PanelsController {
             console.log('About to show session details for:', this.currentSession);
             this.sessionDetails.showSession(this.currentSession);
             
+            // Start polling for updates
+            this.startPolling();
+            
         } catch (error) {
             console.error('Failed to open session details:', error);
             this.sessionDetails.showError(error instanceof Error ? error.message : 'Failed to load session');
@@ -193,9 +196,16 @@ export class PanelsController {
     private closeDetailsPanel(): void {
         this.detailsPanel.classList.remove('active');
         this.currentSession = null;
-        this.sessionDetails.clear();
         
-        // Update resizers visibility
+        // Stop polling when details panel is closed
+        this.stopPolling();
+        
+        // If no sessions panel open, hide resizers
+        if (!this.isSessionsPanelOpen()) {
+            this.panelResizer.hideResizers();
+        }
+        
+        // Update resizers for current layout
         this.panelResizer.showResizers();
     }
 
@@ -261,6 +271,105 @@ export class PanelsController {
                 collapseBtn.textContent = '↓';
                 collapseBtn.title = 'Expand';
             }
+        }
+    }
+
+    private startPolling(): void {
+        // Stop any existing polling
+        this.stopPolling();
+        
+        if (!this.currentSession) return;
+        
+        console.log('Starting polling for session updates');
+        
+        // Show polling indicator
+        const indicator = document.getElementById('polling-indicator');
+        if (indicator) {
+            indicator.style.display = 'flex';
+        }
+        
+        this.pollingInterval = window.setInterval(async () => {
+            await this.pollForUpdates();
+        }, this.POLLING_INTERVAL_MS);
+    }
+
+    private stopPolling(): void {
+        if (this.pollingInterval) {
+            console.log('Stopping polling for session updates');
+            clearInterval(this.pollingInterval);
+            this.pollingInterval = null;
+            
+            // Hide polling indicator
+            const indicator = document.getElementById('polling-indicator');
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
+        }
+    }
+
+    private async pollForUpdates(): Promise<void> {
+        if (!this.currentSession) {
+            this.stopPolling();
+            return;
+        }
+
+        try {
+            // Fetch updated session data
+            const sessions = this.currentUser ? 
+                await this.apiClient.getInterviews(this.currentUser.email) : 
+                await this.apiClient.getInterviews();
+                
+            const updatedSession = sessions.find(s => s.id === this.currentSession!.id);
+            
+            if (!updatedSession) {
+                console.log('Session no longer exists, stopping polling');
+                this.stopPolling();
+                return;
+            }
+
+            // Check if summary or transcription has changed
+            const summaryChanged = updatedSession.summary !== this.currentSession.summary;
+            const transcriptionChanged = updatedSession.transcription !== this.currentSession.transcription;
+            
+            if (summaryChanged || transcriptionChanged) {
+                console.log('Session updates detected:', {
+                    summaryChanged,
+                    transcriptionChanged
+                });
+                
+                // Show update indicator
+                this.showUpdateIndicator();
+                
+                // Update current session
+                this.currentSession = updatedSession;
+                
+                // Update the UI
+                this.sessionDetails.showSession(this.currentSession);
+                
+                // Hide update indicator after a brief moment
+                setTimeout(() => this.hideUpdateIndicator(), 2000);
+            }
+            
+        } catch (error) {
+            console.error('Polling error:', error);
+            // Don't stop polling on temporary errors, but log them
+        }
+    }
+
+    private showUpdateIndicator(): void {
+        const indicator = document.getElementById('selected-session-id');
+        if (indicator) {
+            indicator.style.background = 'var(--success)';
+            indicator.style.color = 'white';
+            indicator.style.transition = 'all 0.3s ease';
+        }
+    }
+
+    private hideUpdateIndicator(): void {
+        const indicator = document.getElementById('selected-session-id');
+        if (indicator) {
+            indicator.style.background = '';
+            indicator.style.color = '';
         }
     }
 }

@@ -1,12 +1,21 @@
 import { Interview } from '../types/api.js';
+import { TabsController } from './TabsController.js';
+import { WellnessForm } from './WellnessForm.js';
 
 export class SessionDetails {
     private summaryContainer: HTMLElement;
     private transcriptContainer: HTMLElement;
+    private wellnessContainer: HTMLElement;
+    private tabsController: TabsController;
+    private wellnessForm: WellnessForm;
 
-    constructor(summaryContainer: HTMLElement, transcriptContainer: HTMLElement) {
-        this.summaryContainer = summaryContainer;
-        this.transcriptContainer = transcriptContainer;
+    constructor(detailsContainer: HTMLElement) {
+        this.summaryContainer = detailsContainer.querySelector('#summary-content')!;
+        this.transcriptContainer = detailsContainer.querySelector('#transcript-content')!;
+        this.wellnessContainer = detailsContainer.querySelector('#wellness-content')!;
+        
+        this.tabsController = new TabsController(detailsContainer);
+        this.wellnessForm = new WellnessForm(this.wellnessContainer);
     }
 
     showSession(session: Interview): void {
@@ -20,6 +29,10 @@ export class SessionDetails {
         
         this.renderSummary(session);
         this.renderTranscript(session);
+        this.renderWellness(session);
+        
+        // Switch to summary tab by default
+        this.tabsController.switchTab('summary');
     }
 
     private renderSummary(session: Interview): void {
@@ -110,6 +123,12 @@ export class SessionDetails {
         console.log('Transcript container after setting HTML:', this.transcriptContainer.innerHTML);
     }
 
+    private renderWellness(session: Interview): void {
+        console.log('Rendering wellness data for session:', session.id);
+        console.log('Wellness data:', session.wellness_data);
+        
+        this.wellnessForm.render(session.wellness_data);
+    }
 
     showLoading(): void {
         this.summaryContainer.innerHTML = `

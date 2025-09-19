@@ -24,10 +24,19 @@ export class SessionsList {
 
         // Add click handlers
         this.container.addEventListener('click', (e) => {
-            const sessionCard = (e.target as HTMLElement).closest('.session-card');
+            const sessionCard = (e.target as Element).closest('.session-card');
             if (sessionCard && this.onSessionSelectCallback) {
                 const sessionId = sessionCard.getAttribute('data-session-id');
                 if (sessionId) {
+                    console.log('Session clicked:', sessionId);
+                    
+                    // Remove active class from all session cards
+                    const allSessionCards = this.container.querySelectorAll('.session-card');
+                    allSessionCards.forEach(card => card.classList.remove('active', 'selected'));
+                    
+                    // Add active class to clicked card
+                    sessionCard.classList.add('active', 'selected');
+                    
                     this.onSessionSelectCallback(sessionId);
                 }
             }
