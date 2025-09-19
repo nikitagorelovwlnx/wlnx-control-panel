@@ -7,6 +7,9 @@ export class ApiClient {
     constructor(baseUrl: string = 'http://localhost:3000', botHealthUrl: string = 'http://localhost:3002') {
         this.baseUrl = baseUrl;
         this.botHealthUrl = botHealthUrl;
+        
+        // Note: botHealthUrl is optional - bot health monitoring is separate from main API
+        console.info(`API Client configured: API=${this.baseUrl}, BotHealth=${this.botHealthUrl}`);
     }
 
     private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -26,7 +29,11 @@ export class ApiClient {
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error(`API Error for ${endpoint}:`, error);
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                console.warn(`Main API server not available at ${this.baseUrl}${endpoint}`);
+            } else {
+                console.error(`API Error for ${endpoint}:`, error);
+            }
             throw error;
         }
     }
@@ -52,7 +59,10 @@ export class ApiClient {
             const data = await response.json();
             return data;
         } catch (error) {
-            if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                // This is expected when bot health server is not running - suppress noisy error
+                console.debug(`Bot health server not available at ${this.botHealthUrl}${endpoint} (this is normal in development)`);
+            } else if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
                 console.warn(`Bot health endpoint ${endpoint} returned HTML instead of JSON - health server not running`);
             } else {
                 console.error(`Bot Health API Error for ${endpoint}:`, error);
@@ -82,11 +92,12 @@ export class ApiClient {
                 sessions: [
                     {
                         id: 'demo-001',
+                        user_id: 'alice.johnson@company.com',
                         email: 'alice.johnson@company.com',
-                        transcription: 'Coach: Hello Alice, how are you feeling today?\nAlice: I\'ve been feeling quite stressed lately with work deadlines.\nCoach: That sounds challenging. Can you tell me more about what\'s causing the stress?',
-                        summary: 'Alice discussed work-related stress and deadline pressures. We explored coping strategies and time management techniques.',
-                        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-                        updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+                        transcription: 'Coach: How are you feeling today Alice?\nAlice: I\'ve been feeling quite stressed lately with work deadlines.\nCoach: Let\'s work through some relaxation techniques together.',
+                        summary: 'Alice expressed work-related stress. Discussed breathing exercises and time management strategies.',
+                        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                        updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
                     }
                 ]
             },
@@ -98,6 +109,7 @@ export class ApiClient {
                 sessions: [
                     {
                         id: 'demo-002',
+                        user_id: 'bob.smith@startup.io',
                         email: 'bob.smith@startup.io',
                         transcription: 'Coach: Hi Bob, how has your week been?\nBob: Pretty good actually! I implemented some of the mindfulness techniques we discussed.\nCoach: That\'s wonderful to hear! How did they work for you?',
                         summary: 'Bob reported positive progress with mindfulness practices. Discussed maintaining consistency and expanding techniques.',
@@ -114,6 +126,7 @@ export class ApiClient {
                 sessions: [
                     {
                         id: 'demo-003',
+                        user_id: 'carol.davis@tech.corp',
                         email: 'carol.davis@tech.corp',
                         transcription: 'Coach: Carol, tell me about your sleep patterns lately.\nCarol: I\'ve been having trouble falling asleep, especially on Sunday nights.\nCoach: Sunday night insomnia is common. Let\'s explore some relaxation techniques.',
                         summary: 'Carol discussed sleep difficulties, particularly Sunday night anxiety. Introduced progressive muscle relaxation techniques.',
@@ -135,7 +148,18 @@ export class ApiClient {
                 // Check if response has results array
                 if (response && response.results && Array.isArray(response.results)) {
                     console.log('Found results array:', response.results);
-                    return response.results;
+                    // Map API WellnessSession to Interview format
+                    return response.results.map((session: any) => ({
+                        id: session.id,
+                        user_id: session.user_id,
+                        email: session.user_id, // API uses user_id as email
+                        created_at: session.created_at,
+                        updated_at: session.updated_at,
+                        transcription: session.transcription,
+                        summary: session.summary,
+                        analysis_results: session.analysis_results,
+                        wellness_data: session.wellness_data
+                    }));
                 } else if (Array.isArray(response)) {
                     return response;
                 } else {
@@ -271,14 +295,13 @@ export class ApiClient {
         try {
             // Try to check if there's any bot-related activity or endpoints
             // This is a fallback when health check server is not available
-            console.info('Bot health check server unavailable, inferring status from API activity');
+            console.debug('Bot health check server unavailable, using fallback status detection');
             
-            // For now, assume bot might be running if we're in development
+            // For now, assume bot is offline when health server is not available
             // In production, you might want to check for recent bot activity via API
-            const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            return isDev; // Assume bot is running in development even without health check
+            return false; // Conservative approach - assume offline without health check
         } catch (error) {
-            console.warn('Cannot infer bot status:', error);
+            console.debug('Cannot infer bot status:', error);
             return false;
         }
     }

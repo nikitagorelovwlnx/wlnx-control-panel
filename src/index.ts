@@ -69,7 +69,28 @@ export class ControlPanel {
                 botDot.classList.toggle('offline', !status.bot);
             }
         } catch (error) {
-            console.error('Failed to check system status:', error);
+            console.debug('Failed to check system status (servers offline):', error);
+            
+            // Update UI to show servers are offline
+            const serverStatusElement = document.getElementById('server-status-text');
+            const botStatusElement = document.getElementById('bot-status-text');
+            const serverDot = document.querySelector('#server-status .status-dot');
+            const botDot = document.querySelector('#bot-status .status-dot');
+            
+            if (serverStatusElement) {
+                serverStatusElement.textContent = 'Offline';
+            }
+            if (botStatusElement) {
+                botStatusElement.textContent = 'Offline';
+            }
+            if (serverDot) {
+                serverDot.classList.remove('online');
+                serverDot.classList.add('offline');
+            }
+            if (botDot) {
+                botDot.classList.remove('online');
+                botDot.classList.add('offline');
+            }
         }
     }
 
