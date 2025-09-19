@@ -41,13 +41,14 @@ export interface WellnessData {
 
 export interface Interview {
     id: string;
-    user_id?: string;
+    user_id: string;  // API always has user_id (which is email)
     created_at: string;
     updated_at: string;
     transcription: string;
     summary: string;
+    analysis_results?: any;
     wellness_data?: WellnessData;
-    email?: string;
+    email?: string;  // Computed field for backward compatibility
 }
 
 export interface ApiResponse<T> {
