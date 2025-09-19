@@ -1,7 +1,7 @@
 import { ApiClient } from './api/client.js';
 import { PanelsController } from './components/PanelsController.js';
 
-class ControlPanel {
+export class ControlPanel {
     private apiClient: ApiClient;
     private panelsController: PanelsController;
 

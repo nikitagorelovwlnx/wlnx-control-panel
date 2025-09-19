@@ -122,6 +122,11 @@ export class PanelsController {
 
     private async openUserSessions(userEmail: string): Promise<void> {
         try {
+            // Close details panel if open (when switching between users)
+            if (this.isDetailsPanelOpen()) {
+                this.closeDetailsPanel();
+            }
+            
             // Find user data
             const users = await this.apiClient.getUsers();
             this.currentUser = users.find(u => u.email === userEmail) || null;
@@ -197,6 +202,10 @@ export class PanelsController {
         this.sessionsPanel.classList.remove('active');
         this.currentUser = null;
         
+        // Clear active state from all user cards
+        const allUserCards = document.querySelectorAll('.user-card');
+        allUserCards.forEach(card => card.classList.remove('active', 'selected'));
+        
         // Reset panel sizes and hide resizers
         this.panelResizer.resetPanelSizes();
         
@@ -207,6 +216,10 @@ export class PanelsController {
     private closeDetailsPanel(): void {
         this.detailsPanel.classList.remove('active');
         this.currentSession = null;
+        
+        // Clear active state from all session cards
+        const allSessionCards = document.querySelectorAll('.session-card');
+        allSessionCards.forEach(card => card.classList.remove('active', 'selected'));
         
         // Stop polling when details panel is closed
         this.stopPolling();
