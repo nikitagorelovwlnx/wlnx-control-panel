@@ -127,8 +127,20 @@ export class ApiClient {
     async getInterviews(email?: string): Promise<Interview[]> {
         try {
             if (email) {
-                const response = await this.makeRequest<Interview[]>(`/api/interviews?email=${encodeURIComponent(email)}`);
-                return Array.isArray(response) ? response : [];
+                console.log('Fetching interviews for user:', email);
+                const response = await this.makeRequest<any>(`/api/interviews?email=${encodeURIComponent(email)}`);
+                console.log('Interviews response for', email, ':', response);
+                
+                // Check if response has results array
+                if (response && response.results && Array.isArray(response.results)) {
+                    console.log('Found results array:', response.results);
+                    return response.results;
+                } else if (Array.isArray(response)) {
+                    return response;
+                } else {
+                    console.warn('Unexpected response format:', response);
+                    return [];
+                }
             } else {
                 // Get all users first, then get interviews for each
                 const users = await this.getUsers();
@@ -136,8 +148,16 @@ export class ApiClient {
                 
                 for (const user of users) {
                     try {
-                        const userInterviews = await this.makeRequest<Interview[]>(`/api/interviews?email=${encodeURIComponent(user.email)}`);
-                        if (Array.isArray(userInterviews)) {
+                        const response = await this.makeRequest<any>(`/api/interviews?email=${encodeURIComponent(user.email)}`);
+                        let userInterviews: Interview[] = [];
+                        
+                        if (response && response.results && Array.isArray(response.results)) {
+                            userInterviews = response.results;
+                        } else if (Array.isArray(response)) {
+                            userInterviews = response;
+                        }
+                        
+                        if (userInterviews.length > 0) {
                             allInterviews.push(...userInterviews);
                         }
                     } catch (error) {
@@ -149,6 +169,7 @@ export class ApiClient {
                 return allInterviews;
             }
         } catch (error) {
+            console.error('Failed to fetch interviews:', error);
             return [];
         }
     }
@@ -338,4 +359,5 @@ export class ApiClient {
             bot: healthStatus.bot.status === 'up' || healthStatus.bot.status === 'degraded'
         };
     }
+
 }

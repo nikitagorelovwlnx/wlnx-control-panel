@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WLNX Control Panel</title>
-    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/minimal.css">
 </head>
 <body>
     <div class="app-container">
         <header class="header">
             <div class="header-content">
                 <div class="header-left">
-                    <h1>🏥 WLNX Control Panel</h1>
-                    <p>AI-powered wellness coaching dashboard</p>
+                    <h1>WLNX Control Panel</h1>
+                    <p>Wellness coaching dashboard</p>
                 </div>
                 <div class="header-right">
                     <div class="status-grid">
@@ -35,7 +35,10 @@
                 <!-- Panel 1: Users List -->
                 <div class="panel users-panel active" id="users-panel">
                     <div class="panel-header">
-                        <h2>🧑‍⚕️ Patients</h2>
+                        <h2>Users</h2>
+                        <div class="panel-header-actions">
+                            <button class="collapse-panel-btn" id="collapse-users" title="Collapse">←</button>
+                        </div>
                     </div>
                     <div class="panel-content">
                         <div id="users-list" class="users-container">
@@ -52,9 +55,12 @@
                 <!-- Panel 2: User Sessions -->
                 <div class="panel sessions-panel" id="sessions-panel">
                     <div class="panel-header">
-                        <button class="close-panel-btn" id="close-sessions">✕</button>
-                        <h2>💬 Sessions</h2>
+                        <h2>Sessions</h2>
                         <span class="panel-subtitle" id="selected-user-name"></span>
+                        <div class="panel-header-actions">
+                            <button class="collapse-panel-btn" id="collapse-sessions" title="Collapse">←</button>
+                            <button class="close-panel-btn" id="close-sessions">✕</button>
+                        </div>
                     </div>
                     <div class="panel-content">
                         <div id="sessions-list" class="sessions-container">
@@ -70,15 +76,20 @@
                 <!-- Panel 3: Session Details -->
                 <div class="panel details-panel" id="details-panel">
                     <div class="panel-header">
-                        <button class="close-panel-btn" id="close-details">✕</button>
-                        <h2>📊 Session Details</h2>
+                        <h2>Details</h2>
                         <span class="panel-subtitle" id="selected-session-id"></span>
+                        <div class="panel-header-actions">
+                            <button class="close-panel-btn" id="close-details">✕</button>
+                        </div>
                     </div>
                     <div class="panel-content">
                         <div class="details-container">
                             <!-- Summary Section -->
                             <div class="summary-section" id="summary-section">
-                                <h3>🎯 Summary</h3>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h3 style="margin: 0;">Summary</h3>
+                                    <button class="collapse-panel-btn" id="collapse-summary" title="Collapse">↑</button>
+                                </div>
                                 <div id="summary-content"></div>
                             </div>
                             
@@ -89,7 +100,10 @@
                             
                             <!-- Transcript Section -->
                             <div class="transcript-section" id="transcript-section">
-                                <h3>💭 Transcript</h3>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h3 style="margin: 0;">Transcript</h3>
+                                    <button class="collapse-panel-btn" id="collapse-transcript" title="Collapse">↑</button>
+                                </div>
                                 <div id="transcript-content"></div>
                             </div>
                         </div>

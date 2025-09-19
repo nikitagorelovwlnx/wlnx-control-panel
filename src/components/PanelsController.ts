@@ -58,6 +58,23 @@ export class PanelsController {
         document.getElementById('close-details')?.addEventListener('click', () => {
             this.closeDetailsPanel();
         });
+
+        // Collapse buttons
+        document.getElementById('collapse-users')?.addEventListener('click', () => {
+            this.togglePanelCollapse('users-panel');
+        });
+
+        document.getElementById('collapse-sessions')?.addEventListener('click', () => {
+            this.togglePanelCollapse('sessions-panel');
+        });
+
+        document.getElementById('collapse-summary')?.addEventListener('click', () => {
+            this.toggleSectionCollapse('summary-section');
+        });
+
+        document.getElementById('collapse-transcript')?.addEventListener('click', () => {
+            this.toggleSectionCollapse('transcript-section');
+        });
     }
 
     async loadUsers(): Promise<void> {
@@ -117,6 +134,8 @@ export class PanelsController {
             // Load sessions
             this.sessionsList.showLoading();
             const sessions = await this.apiClient.getInterviews(userEmail);
+            console.log('Sessions loaded for', userEmail, ':', sessions);
+            console.log('Number of sessions:', sessions.length);
             this.sessionsList.showSessions(sessions, userEmail);
             
         } catch (error) {
@@ -195,5 +214,53 @@ export class PanelsController {
 
     public isDetailsPanelOpen(): boolean {
         return this.detailsPanel.classList.contains('active');
+    }
+
+    private togglePanelCollapse(panelId: string): void {
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+
+        const isCollapsed = panel.classList.contains('collapsed');
+        const collapseBtn = panel.querySelector('.collapse-panel-btn') as HTMLButtonElement;
+        
+        if (isCollapsed) {
+            // Expand
+            panel.classList.remove('collapsed');
+            if (collapseBtn) {
+                collapseBtn.textContent = panelId === 'users-panel' || panelId === 'sessions-panel' ? '←' : '↑';
+                collapseBtn.title = 'Collapse';
+            }
+        } else {
+            // Collapse
+            panel.classList.add('collapsed');
+            if (collapseBtn) {
+                collapseBtn.textContent = panelId === 'users-panel' || panelId === 'sessions-panel' ? '→' : '↓';
+                collapseBtn.title = 'Expand';
+            }
+        }
+    }
+
+    private toggleSectionCollapse(sectionId: string): void {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        const isCollapsed = section.classList.contains('collapsed');
+        const collapseBtn = section.querySelector('.collapse-panel-btn') as HTMLButtonElement;
+        
+        if (isCollapsed) {
+            // Expand
+            section.classList.remove('collapsed');
+            if (collapseBtn) {
+                collapseBtn.textContent = '↑';
+                collapseBtn.title = 'Collapse';
+            }
+        } else {
+            // Collapse
+            section.classList.add('collapsed');
+            if (collapseBtn) {
+                collapseBtn.textContent = '↓';
+                collapseBtn.title = 'Expand';
+            }
+        }
     }
 }
