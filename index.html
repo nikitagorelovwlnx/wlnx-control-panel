@@ -55,8 +55,10 @@
                 <!-- Panel 2: User Sessions -->
                 <div class="panel sessions-panel" id="sessions-panel">
                     <div class="panel-header">
-                        <h2>Sessions</h2>
-                        <span class="panel-subtitle" id="selected-user-name"></span>
+                        <div class="panel-header-left">
+                            <h2>Sessions</h2>
+                            <span class="panel-subtitle" id="selected-user-name"></span>
+                        </div>
                         <div class="panel-header-actions">
                             <button class="collapse-panel-btn" id="collapse-sessions" title="Collapse">←</button>
                             <button class="close-panel-btn" id="close-sessions">✕</button>
@@ -98,28 +100,16 @@
                             <div class="tab-content-container">
                                 <!-- Summary Tab -->
                                 <div class="tab-content active" id="tab-summary">
-                                    <div class="tab-header">
-                                        <h3>Summary</h3>
-                                        <button class="collapse-tab-btn" id="collapse-summary" title="Collapse">↑</button>
-                                    </div>
                                     <div class="tab-body" id="summary-content"></div>
                                 </div>
                                 
                                 <!-- Transcript Tab -->
                                 <div class="tab-content" id="tab-transcript">
-                                    <div class="tab-header">
-                                        <h3>Transcript</h3>
-                                        <button class="collapse-tab-btn" id="collapse-transcript" title="Collapse">↑</button>
-                                    </div>
                                     <div class="tab-body" id="transcript-content"></div>
                                 </div>
                                 
                                 <!-- Wellness Tab -->
                                 <div class="tab-content" id="tab-wellness">
-                                    <div class="tab-header">
-                                        <h3>Wellness Data</h3>
-                                        <button class="collapse-tab-btn" id="collapse-wellness" title="Collapse">↑</button>
-                                    </div>
                                     <div class="tab-body" id="wellness-content"></div>
                                 </div>
                             </div>

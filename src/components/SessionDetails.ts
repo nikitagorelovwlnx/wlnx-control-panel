@@ -130,6 +130,52 @@ export class SessionDetails {
         this.wellnessForm.render(session.wellness_data);
     }
 
+    updateContent(session: Interview, changes: {summary?: boolean, transcript?: boolean, wellness?: boolean}): void {
+        console.log('Updating content with changes:', changes);
+        
+        // Update only the changed content without switching tabs
+        if (changes.summary) {
+            this.showUpdateAnimation('tab-summary');
+            this.showTabUpdateIndicator('summary');
+            this.renderSummary(session);
+        }
+        
+        if (changes.transcript) {
+            this.showUpdateAnimation('tab-transcript');
+            this.showTabUpdateIndicator('transcript');
+            this.renderTranscript(session);
+        }
+        
+        if (changes.wellness) {
+            this.showUpdateAnimation('tab-wellness');
+            this.showTabUpdateIndicator('wellness');
+            this.renderWellness(session);
+        }
+    }
+
+    private showUpdateAnimation(tabId: string): void {
+        const tabElement = document.getElementById(tabId);
+        if (tabElement) {
+            tabElement.classList.add('updating');
+            setTimeout(() => {
+                tabElement.classList.remove('updating');
+            }, 600); // Match animation duration
+        }
+    }
+
+    private showTabUpdateIndicator(tabName: string): void {
+        const tabBtn = document.querySelector(`[data-tab="${tabName}"]`);
+        if (tabBtn && !tabBtn.classList.contains('active')) {
+            // Only show indicator if tab is not currently active
+            tabBtn.classList.add('has-updates');
+            
+            // Remove indicator after 5 seconds
+            setTimeout(() => {
+                tabBtn.classList.remove('has-updates');
+            }, 5000);
+        }
+    }
+
     showLoading(): void {
         this.summaryContainer.innerHTML = `
             <div class="loading">
