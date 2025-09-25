@@ -8,9 +8,11 @@ export class ControlPanel {
     private appTabController: AppTabController; // Handles main app tabs (Dashboard/Prompts)
 
     constructor() {
+        console.log('🚀 Initializing WLNX Control Panel...');
         this.apiClient = new ApiClient();
         this.panelsController = new PanelsController(this.apiClient);
         this.appTabController = new AppTabController(this.apiClient); // Self-initializing controller
+        console.log('✅ AppTabController created');
         
         this.init();
     }

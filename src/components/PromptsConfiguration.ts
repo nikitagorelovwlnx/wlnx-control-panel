@@ -8,21 +8,29 @@ export class PromptsConfigurationComponent {
 
     constructor(container: HTMLElement, apiClient: ApiClient) {
         this.container = container;
-        this.apiClient = apiClient; // Will be used for actual API calls when implemented
+        this.apiClient = apiClient;
     }
 
     async initialize(): Promise<void> {
         try {
+            console.log('🔄 PromptsConfiguration: Loading configuration...');
             await this.loadConfiguration();
+            console.log('✅ PromptsConfiguration: Configuration loaded, rendering...');
             this.render();
+            console.log('✅ PromptsConfiguration: Render complete');
         } catch (error) {
-            console.error('Failed to initialize prompts configuration:', error);
+            console.error('❌ Failed to initialize prompts configuration:', error);
             this.showError('Failed to load prompts configuration');
         }
     }
 
     private async loadConfiguration(): Promise<void> {
         this.currentConfig = await this.apiClient.getPromptsConfiguration();
+        console.log('📊 PromptsConfiguration: Loaded config:', {
+            stages: this.currentConfig?.stages?.length || 0,
+            prompts: this.currentConfig?.prompts?.length || 0,
+            data: this.currentConfig
+        });
     }
 
 

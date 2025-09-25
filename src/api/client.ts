@@ -434,36 +434,94 @@ export class ApiClient {
 
     // Prompts Configuration API methods
     async getPromptsConfiguration(): Promise<PromptsConfiguration> {
+        console.log('🔄 Fetching prompts configuration from server at /api/prompts');
+        
         try {
-            // First check if we have locally modified prompts
-            const localConfig = localStorage.getItem('wlnx-prompts-config');
-            if (localConfig) {
-                console.log('🔄 Loading locally modified prompts configuration');
-                return JSON.parse(localConfig);
-            }
-            
-            console.log('🔄 Fetching prompts configuration from server');
-            
             // Call real API endpoint
             const response = await this.makeRequest<any>('/api/prompts');
+            console.log('📡 Server response:', response);
             
-            // Transform server response to our format
-            if (response) {
+            // Check if server returned proper format - handle real API structure
+            const data = response.data || response;
+            if (data && typeof data === 'object') {
+                // Transform server data structure to our expected format
+                const stages: ConversationStage[] = [];
+                const prompts: Prompt[] = [];
+                let stageOrder = 1;
+                
+                // Convert server data categories to stages and prompts
+                for (const [stageId, stageData] of Object.entries(data)) {
+                    console.log(`Processing stage: ${stageId}`, stageData);
+                    
+                    if (typeof stageData === 'object' && stageData !== null) {
+                        // Create stage
+                        const stageName = stageId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        stages.push({
+                            id: stageId,
+                            name: stageName,
+                            description: `Configuration for ${stageName.toLowerCase()}`,
+                            order: stageOrder++
+                        });
+                        
+                        // Handle different data structures from server
+                        if (Array.isArray(stageData)) {
+                            // Direct array of prompts
+                            stageData.forEach((promptText, index) => {
+                                prompts.push({
+                                    id: `${stageId}_${index + 1}`,
+                                    stageId: stageId,
+                                    content: promptText,
+                                    order: index + 1,
+                                    isActive: true,
+                                    description: `Prompt ${index + 1} for ${stageName}`
+                                });
+                            });
+                        } else if (typeof stageData === 'object') {
+                            // Object with prompts - check various possible structures
+                            const stageObj = stageData as any;
+                            const prompts_array = stageObj.prompts || stageObj.questions || stageObj.items || Object.values(stageData);
+                            if (Array.isArray(prompts_array)) {
+                                prompts_array.forEach((promptText, index) => {
+                                    if (typeof promptText === 'string') {
+                                        prompts.push({
+                                            id: `${stageId}_${index + 1}`,
+                                            stageId: stageId,
+                                            content: promptText,
+                                            order: index + 1,
+                                            isActive: true,
+                                            description: `Prompt ${index + 1} for ${stageName}`
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                console.log('✅ Transformed server data:', { 
+                    stages: stages.length, 
+                    prompts: prompts.length 
+                });
+                
                 return {
-                    stages: response.stages || [],
-                    prompts: response.prompts || [],
-                    lastUpdated: response.lastUpdated || new Date().toISOString()
+                    stages,
+                    prompts,
+                    lastUpdated: new Date().toISOString()
                 };
             }
             
-            // Fallback to mock if server response is empty
-            console.warn('Empty response from prompts API, using mock data');
-            return this.getMockPromptsConfiguration();
+            // Server response invalid - use mock
+            console.warn('⚠️ Invalid server response format, using mock data');
+            console.log('Response structure:', Object.keys(response || {}));
+            console.log('Data structure:', Object.keys(data || {}));
+            
         } catch (error) {
-            console.error('Failed to fetch prompts configuration:', error);
-            console.warn('Using mock prompts configuration as fallback');
-            return this.getMockPromptsConfiguration();
+            console.error('❌ Failed to fetch from /api/prompts:', error);
         }
+        
+        // Always fallback to mock data
+        console.log('🔄 Using mock prompts configuration as fallback');
+        return this.getMockPromptsConfiguration();
     }
 
     async updatePromptsConfiguration(config: PromptsConfiguration): Promise<boolean> {

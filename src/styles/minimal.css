@@ -149,9 +149,11 @@ body {
 /* Main Content */
 .main-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     background: var(--bg-secondary);
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .panels-container {
@@ -1145,14 +1147,28 @@ body {
 }
 
 .app-tab-content {
-    display: none;
+    display: none !important;
     flex: 1;
     min-height: 0;
 }
 
 .app-tab-content.active {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    min-height: 500px;
+}
+
+#app-tab-prompts.active {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    height: 100%;
+    min-height: 600px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 /* Prompts Configuration Styles */
@@ -1160,8 +1176,8 @@ body {
     padding: var(--space-lg);
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+    flex: 1;
+    min-height: 400px;
 }
 
 .prompts-header {
@@ -1224,7 +1240,8 @@ body {
 .prompts-content {
     flex: 1;
     overflow-y: auto;
-    padding-right: var(--space-sm);
+    background: yellow !important;
+    border: 3px solid green !important;
 }
 
 .prompts-stages {
@@ -1274,13 +1291,18 @@ body {
 }
 
 .stage-prompts {
+    padding: var(--space-md);
     display: flex;
     flex-direction: column;
 }
 
 .prompt-item {
+    padding: var(--space-md);
     border-bottom: 1px solid var(--border-light);
     transition: all 0.2s ease;
+    min-height: 100px;
+    background: pink !important;
+    border: 2px solid orange !important;
 }
 
 .prompt-item:last-child {
