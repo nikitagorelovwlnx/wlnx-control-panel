@@ -1,4 +1,4 @@
-import { User, ChatMessage, InterviewSummary, Interview, HealthResponse, PingResponse } from '../types/api.js';
+import { User, ChatMessage, InterviewSummary, Interview, HealthResponse, PingResponse, PromptsConfiguration, ConversationStage, Prompt } from '../types/api.js';
 
 export class ApiClient {
     private baseUrl: string;
@@ -430,6 +430,113 @@ export class ApiClient {
             console.error('Failed to delete all user sessions:', error);
             return { success: false, deletedCount: 0 };
         }
+    }
+
+    // Prompts Configuration API methods
+    async getPromptsConfiguration(): Promise<PromptsConfiguration> {
+        try {
+            // First check if we have locally modified prompts
+            const localConfig = localStorage.getItem('wlnx-prompts-config');
+            if (localConfig) {
+                console.log('🔄 Loading locally modified prompts configuration');
+                return JSON.parse(localConfig);
+            }
+            
+            console.log('🔄 Fetching prompts configuration from server');
+            
+            // Call real API endpoint
+            const response = await this.makeRequest<any>('/api/prompts');
+            
+            // Transform server response to our format
+            if (response) {
+                return {
+                    stages: response.stages || [],
+                    prompts: response.prompts || [],
+                    lastUpdated: response.lastUpdated || new Date().toISOString()
+                };
+            }
+            
+            // Fallback to mock if server response is empty
+            console.warn('Empty response from prompts API, using mock data');
+            return this.getMockPromptsConfiguration();
+        } catch (error) {
+            console.error('Failed to fetch prompts configuration:', error);
+            console.warn('Using mock prompts configuration as fallback');
+            return this.getMockPromptsConfiguration();
+        }
+    }
+
+    async updatePromptsConfiguration(config: PromptsConfiguration): Promise<boolean> {
+        try {
+            // NOTE: Server API currently has hardcoded prompts (read-only)
+            // This is a client-side only save for now until server supports updates
+            console.log('🔄 Client-side save: Prompts are currently hardcoded on server', { promptCount: config.prompts.length, stageCount: config.stages.length });
+            
+            // Simulate saving delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Store in localStorage as fallback until server supports updates
+            localStorage.setItem('wlnx-prompts-config', JSON.stringify(config));
+            
+            console.log('✅ Client-side: Prompts configuration saved to localStorage');
+            return true;
+        } catch (error) {
+            console.error('Failed to save prompts configuration:', error);
+            throw error;
+        }
+    }
+
+    private getMockPromptsConfiguration(): PromptsConfiguration {
+        const stages: ConversationStage[] = [
+            { id: 'welcome', name: 'Welcome & Introduction', description: 'Initial greeting and rapport building', order: 1 },
+            { id: 'assessment', name: 'Health Assessment', description: 'Gathering baseline health information', order: 2 },
+            { id: 'goals', name: 'Goal Setting', description: 'Identifying wellness goals and priorities', order: 3 },
+            { id: 'planning', name: 'Action Planning', description: 'Creating specific wellness action plans', order: 4 },
+            { id: 'closure', name: 'Session Closure', description: 'Wrapping up and next steps', order: 5 }
+        ];
+
+        const prompts: Prompt[] = [
+            // Welcome stage prompts
+            { id: 'w1', stageId: 'welcome', content: 'Hello! I\'m your wellness coach. How are you feeling today?', order: 1, isActive: true, description: 'Opening greeting' },
+            { id: 'w2', stageId: 'welcome', content: 'I\'m here to help you on your wellness journey. What brings you here today?', order: 2, isActive: true, description: 'Purpose inquiry' },
+            { id: 'w3', stageId: 'welcome', content: 'Before we begin, I\'d like to learn a bit about your background. Tell me about yourself.', order: 3, isActive: true, description: 'Background gathering' },
+            { id: 'w4', stageId: 'welcome', content: 'What does wellness mean to you personally?', order: 4, isActive: true, description: 'Personal wellness definition' },
+            { id: 'w5', stageId: 'welcome', content: 'Have you worked with a wellness coach before? What was that experience like?', order: 5, isActive: true, description: 'Previous experience' },
+
+            // Assessment stage prompts  
+            { id: 'a1', stageId: 'assessment', content: 'Let\'s start with your current health status. How would you rate your overall health on a scale of 1-10?', order: 1, isActive: true, description: 'Overall health rating' },
+            { id: 'a2', stageId: 'assessment', content: 'Tell me about your current sleep patterns. How many hours do you typically sleep?', order: 2, isActive: true, description: 'Sleep assessment' },
+            { id: 'a3', stageId: 'assessment', content: 'What does your typical day of eating look like?', order: 3, isActive: true, description: 'Nutrition assessment' },
+            { id: 'a4', stageId: 'assessment', content: 'How often do you engage in physical activity or exercise?', order: 4, isActive: true, description: 'Physical activity assessment' },
+            { id: 'a5', stageId: 'assessment', content: 'What are your current stress levels like? What typically causes stress in your life?', order: 5, isActive: true, description: 'Stress assessment' },
+
+            // Goals stage prompts
+            { id: 'g1', stageId: 'goals', content: 'What are your main wellness goals for the next 3 months?', order: 1, isActive: true, description: 'Short-term goals' },
+            { id: 'g2', stageId: 'goals', content: 'If you could wave a magic wand and change one thing about your health, what would it be?', order: 2, isActive: true, description: 'Priority identification' },
+            { id: 'g3', stageId: 'goals', content: 'What has prevented you from achieving these goals in the past?', order: 3, isActive: true, description: 'Barrier identification' },
+            { id: 'g4', stageId: 'goals', content: 'On a scale of 1-10, how motivated are you to make these changes?', order: 4, isActive: true, description: 'Motivation assessment' },
+            { id: 'g5', stageId: 'goals', content: 'What support system do you have in place for your wellness journey?', order: 5, isActive: true, description: 'Support system' },
+
+            // Planning stage prompts
+            { id: 'p1', stageId: 'planning', content: 'Let\'s create a specific action plan. What\'s one small step you can take this week?', order: 1, isActive: true, description: 'First action step' },
+            { id: 'p2', stageId: 'planning', content: 'When and where will you implement this action? Let\'s be specific.', order: 2, isActive: true, description: 'Implementation planning' },
+            { id: 'p3', stageId: 'planning', content: 'What potential obstacles might come up, and how will you handle them?', order: 3, isActive: true, description: 'Obstacle planning' },
+            { id: 'p4', stageId: 'planning', content: 'How will you track your progress on this goal?', order: 4, isActive: true, description: 'Progress tracking' },
+            { id: 'p5', stageId: 'planning', content: 'What will success look like for you? How will you know you\'ve achieved your goal?', order: 5, isActive: true, description: 'Success criteria' },
+
+            // Closure stage prompts
+            { id: 'c1', stageId: 'closure', content: 'Let\'s summarize what we\'ve discussed today. What are your key takeaways?', order: 1, isActive: true, description: 'Session summary' },
+            { id: 'c2', stageId: 'closure', content: 'What questions do you have before we wrap up?', order: 2, isActive: true, description: 'Question opportunity' },
+            { id: 'c3', stageId: 'closure', content: 'How are you feeling about the plan we\'ve created together?', order: 3, isActive: true, description: 'Plan confidence' },
+            { id: 'c4', stageId: 'closure', content: 'What support do you need from me between now and our next session?', order: 4, isActive: true, description: 'Support needs' },
+            { id: 'c5', stageId: 'closure', content: 'Thank you for this session. I look forward to hearing about your progress!', order: 5, isActive: true, description: 'Closing appreciation' }
+        ];
+
+        return {
+            stages,
+            prompts,
+            lastUpdated: new Date().toISOString()
+        };
     }
 
 }

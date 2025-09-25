@@ -1,4 +1,5 @@
 import { resetMockState } from '../setup';
+import { ControlPanel } from '../../src/index';
 
 // Setup DOM for each test
 export const setupDOM = () => {
@@ -27,7 +28,15 @@ export const setupDOM = () => {
       </div>
       
       <div class="main-content">
-        <div class="panels-container" id="panels-container">
+        <!-- App Level Tabs -->
+        <div class="app-tabs">
+          <button class="app-tab-btn active" data-tab="dashboard">Dashboard</button>
+          <button class="app-tab-btn" data-tab="prompts">Prompts Configuration</button>
+        </div>
+
+        <!-- Dashboard Tab Content -->
+        <div class="app-tab-content active" id="app-tab-dashboard">
+          <div class="panels-container" id="panels-container">
           <!-- Panel 1: Users List -->
           <div class="panel users-panel" id="users-panel">
             <div class="panel-header">
@@ -95,6 +104,24 @@ export const setupDOM = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prompts Configuration Tab Content -->
+        <div class="app-tab-content" id="app-tab-prompts">
+          <div class="prompts-container">
+            <div class="prompts-header">
+              <h2>Prompts Configuration</h2>
+              <p>Configure conversation prompts for each stage of the wellness coaching interview</p>
+              <div class="prompts-actions">
+                <button class="btn btn-primary" id="save-prompts">Save Configuration</button>
+                <button class="btn btn-secondary" id="reload-prompts">Reload from Server</button>
+              </div>
+            </div>
+            
+            <div class="prompts-content" id="prompts-content">
+              <div class="loading">Loading prompts configuration...</div>
             </div>
           </div>
         </div>
@@ -179,3 +206,10 @@ export const click = (element: Element) => {
 
 // Wait for async operations
 export const wait = (ms: number = 100) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Setup app with DOM and initialize control panel
+export const setupApp = async () => {
+  setupDOM();
+  new ControlPanel(); // Initialize control panel
+  await wait(100); // Allow initialization
+};

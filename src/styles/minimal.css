@@ -1110,3 +1110,318 @@ body {
         opacity: 1 !important;
     }
 }
+
+/* App Level Tabs */
+.app-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-primary);
+    padding: 0 var(--space-lg);
+    gap: var(--space-sm);
+}
+
+.app-tab-btn {
+    background: none;
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    position: relative;
+    top: 1px;
+}
+
+.app-tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.app-tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--bg-primary);
+}
+
+.app-tab-content {
+    display: none;
+    flex: 1;
+    min-height: 0;
+}
+
+.app-tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Prompts Configuration Styles */
+.prompts-container {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.prompts-header {
+    margin-bottom: var(--space-lg);
+}
+
+.prompts-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.prompts-header p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.prompts-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.btn {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.btn:hover {
+    background: var(--bg-secondary);
+}
+
+.btn.btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.btn.btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn.btn-secondary {
+    background: var(--bg-secondary);
+    border-color: var(--border-medium);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.prompts-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: var(--space-sm);
+}
+
+.prompts-stages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.prompts-stage {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+.stage-header {
+    background: var(--bg-secondary);
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border);
+}
+
+.stage-header h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.stage-description {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.stage-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.prompt-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius);
+}
+
+.stage-prompts {
+    display: flex;
+    flex-direction: column;
+}
+
+.prompt-item {
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+}
+
+.prompt-item:last-child {
+    border-bottom: none;
+}
+
+.prompt-item.inactive {
+    opacity: 0.6;
+    background: var(--bg-tertiary);
+}
+
+.prompt-header {
+    display: flex;
+    align-items: center;
+    padding: var(--space-md);
+    gap: var(--space-md);
+}
+
+.prompt-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.prompt-order {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    font-weight: 500;
+    min-width: 24px;
+}
+
+.prompt-description {
+    flex: 1;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.prompt-content {
+    padding: 0 var(--space-md) var(--space-md);
+}
+
+.prompt-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    resize: vertical;
+    transition: border-color 0.2s ease;
+}
+
+.prompt-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.prompt-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-medium);
+    transition: 0.2s;
+    border-radius: 20px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.2s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--accent);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(16px);
+}
+
+/* Loading and Error States */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-xl);
+    color: var(--text-secondary);
+}
+
+.error-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-xl);
+    color: var(--error);
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius);
+    margin: var(--space-md);
+}
+
+/* Animation for messages */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

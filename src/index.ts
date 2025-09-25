@@ -1,13 +1,16 @@
 import { ApiClient } from './api/client.js';
 import { PanelsController } from './components/PanelsController.js';
+import { AppTabController } from './components/AppTabController.js';
 
 export class ControlPanel {
     private apiClient: ApiClient;
     private panelsController: PanelsController;
+    private appTabController: AppTabController; // Handles main app tabs (Dashboard/Prompts)
 
     constructor() {
         this.apiClient = new ApiClient();
         this.panelsController = new PanelsController(this.apiClient);
+        this.appTabController = new AppTabController(this.apiClient); // Self-initializing controller
         
         this.init();
     }
@@ -105,6 +108,11 @@ export class ControlPanel {
         console.log('Refreshing data...');
         await this.panelsController.refresh();
         await this.checkSystemStatus();
+        
+        // Refresh prompts configuration if on prompts tab
+        if (this.appTabController.getCurrentTab() === 'prompts') {
+            console.log('Refreshing prompts configuration...');
+        }
     }
 }
 

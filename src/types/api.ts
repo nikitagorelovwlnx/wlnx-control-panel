@@ -92,3 +92,26 @@ export interface PingResponse {
     status: 'ok';
     timestamp: string;
 }
+
+// Prompts configuration types
+export interface ConversationStage {
+    id: string;
+    name: string;
+    description: string;
+    order: number;
+}
+
+export interface Prompt {
+    id: string;
+    stageId: string;
+    content: string;
+    order: number;
+    isActive: boolean;
+    description?: string;
+}
+
+export interface PromptsConfiguration {
+    stages: ConversationStage[];
+    prompts: Prompt[];
+    lastUpdated: string;
+}

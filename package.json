@@ -15,7 +15,9 @@
     "test:session-management": "jest tests/functional/session-management.test.ts",
     "test:delete-all": "jest tests/functional/delete-all-sessions.test.ts",
     "test:error-handling": "jest tests/functional/error-handling.test.ts",
-    "test:navigation": "jest tests/functional/panel-navigation.test.ts"
+    "test:navigation": "jest tests/functional/panel-navigation.test.ts",
+    "test:prompts": "jest tests/functional/prompts-configuration.test.ts",
+    "test:prompts-api": "jest tests/functional/prompts-api.test.ts"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",

@@ -25,6 +25,7 @@ export const mockInterviews: Record<string, Interview[]> = {
   'alice@example.com': [
     {
       id: 'session-alice-1',
+      user_id: 'alice@example.com',
       email: 'alice@example.com',
       created_at: '2025-01-15T10:30:00Z',
       updated_at: '2025-01-15T10:45:00Z',
@@ -33,6 +34,7 @@ export const mockInterviews: Record<string, Interview[]> = {
     },
     {
       id: 'session-alice-2', 
+      user_id: 'alice@example.com',
       email: 'alice@example.com',
       created_at: '2025-01-14T16:20:00Z',
       updated_at: '2025-01-14T16:35:00Z',
@@ -41,6 +43,7 @@ export const mockInterviews: Record<string, Interview[]> = {
     },
     {
       id: 'session-alice-3',
+      user_id: 'alice@example.com',
       email: 'alice@example.com', 
       created_at: '2025-01-13T11:10:00Z',
       updated_at: '2025-01-13T11:25:00Z',
@@ -51,6 +54,7 @@ export const mockInterviews: Record<string, Interview[]> = {
   'bob@example.com': [
     {
       id: 'session-bob-1',
+      user_id: 'bob@example.com',
       email: 'bob@example.com',
       created_at: '2025-01-14T14:15:00Z',
       updated_at: '2025-01-14T14:30:00Z',
@@ -59,6 +63,7 @@ export const mockInterviews: Record<string, Interview[]> = {
     },
     {
       id: 'session-bob-2',
+      user_id: 'bob@example.com',
       email: 'bob@example.com',
       created_at: '2025-01-12T13:45:00Z',
       updated_at: '2025-01-12T14:00:00Z',
@@ -69,6 +74,7 @@ export const mockInterviews: Record<string, Interview[]> = {
   'charlie@example.com': [
     {
       id: 'session-charlie-1',
+      user_id: 'charlie@example.com',
       email: 'charlie@example.com',
       created_at: '2025-01-13T09:00:00Z',
       updated_at: '2025-01-13T09:15:00Z',
