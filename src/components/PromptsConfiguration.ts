@@ -10,6 +10,21 @@ export class PromptsConfigurationComponent {
     constructor(container: HTMLElement, apiClient: ApiClient) {
         this.container = container;
         this.apiClient = apiClient;
+        
+        // Try to restore active stage from localStorage immediately
+        const savedActiveStage = localStorage.getItem('wlnx-active-prompts-stage');
+        if (savedActiveStage) {
+            this.activeStageId = savedActiveStage;
+            console.log('🔄 Constructor: Restored active stage from localStorage:', savedActiveStage);
+        }
+        
+        // Listen for storage changes from other tabs/windows
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'wlnx-active-prompts-stage' && e.newValue) {
+                console.log('🔄 Storage event: Active stage changed to:', e.newValue);
+                this.activeStageId = e.newValue;
+            }
+        });
     }
 
     async initialize(): Promise<void> {
@@ -41,19 +56,33 @@ export class PromptsConfigurationComponent {
             return;
         }
 
-        // Restore active stage from localStorage or set first stage as active
+        // ALWAYS check localStorage first - this is the source of truth
         const savedActiveStage = localStorage.getItem('wlnx-active-prompts-stage');
+        console.log('🔄 Render: localStorage contains:', savedActiveStage);
+        console.log('🔄 Render: Current activeStageId before validation:', this.activeStageId);
+        
+        // If localStorage has a valid stage, use it regardless of current activeStageId
         if (savedActiveStage && this.currentConfig.stages.find(s => s.id === savedActiveStage)) {
-            this.activeStageId = savedActiveStage;
-            console.log('🔄 Restored active stage from localStorage:', savedActiveStage);
-        } else if (!this.activeStageId && this.currentConfig.stages.length > 0) {
-            this.activeStageId = this.currentConfig.stages[0].id;
-            console.log('🔄 Set default active stage:', this.activeStageId);
+            if (this.activeStageId !== savedActiveStage) {
+                console.log('🔄 Render: Overriding activeStageId with localStorage value:', savedActiveStage);
+                this.activeStageId = savedActiveStage;
+            }
+        }
+        
+        // Final validation - if still no valid activeStageId, use default
+        if (!this.activeStageId || !this.currentConfig.stages.find(s => s.id === this.activeStageId)) {
+            if (this.currentConfig.stages.length > 0) {
+                this.activeStageId = this.currentConfig.stages[0].id;
+                console.log('🔄 Render: Set default active stage:', this.activeStageId);
+            }
+        } else {
+            console.log('🔄 Render: Using final active stage:', this.activeStageId);
         }
         
         // Always save current active stage to localStorage to ensure persistence
         if (this.activeStageId) {
             localStorage.setItem('wlnx-active-prompts-stage', this.activeStageId);
+            console.log('💾 Render: Saved active stage to localStorage:', this.activeStageId);
         }
 
         const html = `
@@ -183,10 +212,16 @@ export class PromptsConfigurationComponent {
     }
 
     private showStage(stageId: string): void {
+        console.log('🎯 showStage called with:', stageId);
         this.activeStageId = stageId;
         
         // Save active stage to localStorage
         localStorage.setItem('wlnx-active-prompts-stage', stageId);
+        console.log('💾 showStage: Saved to localStorage:', stageId);
+        
+        // Verify it was saved
+        const verified = localStorage.getItem('wlnx-active-prompts-stage');
+        console.log('✅ showStage: Verified localStorage contains:', verified);
         
         // Update tab buttons
         document.querySelectorAll('.stage-tab-btn').forEach(btn => {
@@ -337,12 +372,15 @@ export class PromptsConfigurationComponent {
             
             // Save current active stage to restore after reload
             const currentActiveStage = this.activeStageId;
+            console.log('🔄 reloadConfiguration: Saving current active stage:', currentActiveStage);
             
             await this.loadConfiguration();
             
-            // Restore the active stage if it still exists
+            // Force restore the active stage - don't let render() override it
             if (currentActiveStage && this.currentConfig?.stages.find(s => s.id === currentActiveStage)) {
                 this.activeStageId = currentActiveStage;
+                localStorage.setItem('wlnx-active-prompts-stage', currentActiveStage);
+                console.log('🔄 reloadConfiguration: Restored active stage:', currentActiveStage);
             }
             
             this.render();
