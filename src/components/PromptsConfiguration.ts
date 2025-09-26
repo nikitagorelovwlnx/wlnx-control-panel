@@ -337,13 +337,9 @@ export class PromptsConfigurationComponent {
             // Save cleared prompts to server
             await this.apiClient.updateStagePrompts(stageId, stagePrompts);
 
-            // Update UI - clear all textareas for this stage
-            stagePrompts.forEach(prompt => {
-                const textarea = document.querySelector(`textarea[data-prompt-id="${prompt.id}"]`) as HTMLTextAreaElement;
-                if (textarea) {
-                    textarea.value = '';
-                }
-            });
+            // Reload configuration from server to get actual defaults
+            console.log('🔄 Reloading configuration to get defaults...');
+            await this.reloadConfiguration();
 
             this.showSuccess(`${stageName} prompts restored to defaults and saved!`);
         } catch (error) {
@@ -366,14 +362,16 @@ export class PromptsConfigurationComponent {
 
     public async reloadConfiguration(): Promise<void> {
         try {
-            this.showLoading();
-            
             console.log('🔄 Reloading configuration from server');
             
-            // Save current active stage to restore after reload
-            const currentActiveStage = this.activeStageId;
-            console.log('🔄 reloadConfiguration: Saving current active stage:', currentActiveStage);
+            // Save current active stage to restore after reload - check localStorage first
+            const savedActiveStage = localStorage.getItem('wlnx-active-prompts-stage');
+            const currentActiveStage = savedActiveStage || this.activeStageId;
+            console.log('🔄 reloadConfiguration: Current active stage from localStorage:', savedActiveStage);
+            console.log('🔄 reloadConfiguration: Current active stage from instance:', this.activeStageId);
+            console.log('🔄 reloadConfiguration: Will use active stage:', currentActiveStage);
             
+            this.showLoading();
             await this.loadConfiguration();
             
             // Force restore the active stage - don't let render() override it
@@ -381,6 +379,11 @@ export class PromptsConfigurationComponent {
                 this.activeStageId = currentActiveStage;
                 localStorage.setItem('wlnx-active-prompts-stage', currentActiveStage);
                 console.log('🔄 reloadConfiguration: Restored active stage:', currentActiveStage);
+            } else if (this.currentConfig && this.currentConfig.stages.length > 0) {
+                // Fallback to first stage if saved stage is not found
+                this.activeStageId = this.currentConfig.stages[0].id;
+                localStorage.setItem('wlnx-active-prompts-stage', this.activeStageId);
+                console.log('🔄 reloadConfiguration: Fallback to first stage:', this.activeStageId);
             }
             
             this.render();

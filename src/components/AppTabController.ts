@@ -104,7 +104,7 @@ export class AppTabController {
 
         // Initialize prompts configuration if needed
         if (tabId === 'prompts') {
-            console.log('🎯 Prompts tab selected, forcing fresh API call...');
+            console.log('🎯 Prompts tab selected...');
             
             // Check element visibility after CSS changes
             setTimeout(() => {
@@ -134,9 +134,13 @@ export class AppTabController {
                 }
             }, 100);
             
-            // Always reinitialize to force API call
-            this.promptsConfig = null;
-            this.initializePromptsConfig();
+            // Only initialize if we don't have a prompts config yet
+            if (!this.promptsConfig) {
+                console.log('🔄 First time on prompts tab, initializing...');
+                this.initializePromptsConfig();
+            } else {
+                console.log('🔄 Prompts config already exists, keeping current state');
+            }
         }
 
         this.currentTab = tabId;
@@ -185,5 +189,15 @@ export class AppTabController {
 
     public getCurrentTab(): string {
         return this.currentTab;
+    }
+
+    public async refreshPromptsConfiguration(): Promise<void> {
+        if (this.promptsConfig) {
+            console.log('🔄 Refreshing existing prompts configuration...');
+            await this.promptsConfig.reloadConfiguration();
+        } else {
+            console.log('🔄 No existing prompts config, initializing...');
+            await this.initializePromptsConfig();
+        }
     }
 }

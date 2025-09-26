@@ -114,6 +114,7 @@ export class ControlPanel {
         // Refresh prompts configuration if on prompts tab
         if (this.appTabController.getCurrentTab() === 'prompts') {
             console.log('Refreshing prompts configuration...');
+            await this.appTabController.refreshPromptsConfiguration();
         }
     }
 }
