@@ -191,6 +191,12 @@ export class SessionDetails {
         if (transcriptText === this.lastTranscriptContent) {
             return; // No changes, don't update
         }
+        
+        console.debug('Transcript update:', {
+            oldLength: this.lastTranscriptContent.length,
+            newLength: transcriptText.length,
+            sessionId: session.id
+        });
 
         // Find the dialog content container
         const dialogContentEl = document.getElementById(`dialog-content-${session.id}`);
@@ -200,26 +206,51 @@ export class SessionDetails {
             return;
         }
 
-        // Check if new content is longer (new messages added)
-        if (transcriptText.length > this.lastTranscriptContent.length && 
-            transcriptText.startsWith(this.lastTranscriptContent)) {
+        // Parse both old and new content into message blocks
+        const oldMessageBlocks = this.lastTranscriptContent.split('\n\n').filter(block => block.trim());
+        const newMessageBlocks = transcriptText.split('\n\n').filter(block => block.trim());
+        
+        // Check if new messages were added (new content is longer and starts with old content)
+        if (newMessageBlocks.length > oldMessageBlocks.length) {
+            // Verify that existing messages haven't changed
+            let existingMessagesUnchanged = true;
+            for (let i = 0; i < oldMessageBlocks.length; i++) {
+                if (oldMessageBlocks[i] !== newMessageBlocks[i]) {
+                    existingMessagesUnchanged = false;
+                    break;
+                }
+            }
             
-            // Extract only the new content
-            const newContent = transcriptText.substring(this.lastTranscriptContent.length);
-            const newMessages = this.formatTranscriptAsDialog(newContent);
-            
-            // Append new messages without re-rendering existing ones
-            if (newMessages && newMessages !== '<div class="no-transcript">Unable to parse transcript</div>') {
-                dialogContentEl.insertAdjacentHTML('beforeend', newMessages);
+            if (existingMessagesUnchanged) {
+                // Extract only the new message blocks
+                const newBlocks = newMessageBlocks.slice(oldMessageBlocks.length);
+                
+                console.debug('Adding new message blocks:', {
+                    oldBlocksCount: oldMessageBlocks.length,
+                    newBlocksCount: newMessageBlocks.length,
+                    newBlocks: newBlocks
+                });
+                
+                // Format each new block and append
+                for (const block of newBlocks) {
+                    const newMessageHtml = this.formatTranscriptAsDialog(block);
+                    if (newMessageHtml && newMessageHtml !== '<div class="no-transcript">Unable to parse transcript</div>') {
+                        dialogContentEl.insertAdjacentHTML('beforeend', newMessageHtml);
+                    }
+                }
                 
                 // Scroll to bottom to show new messages
                 const transcriptContainer = this.transcriptContainer.querySelector('.transcript-container');
                 if (transcriptContainer) {
                     transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
                 }
+            } else {
+                // Existing messages changed, do full re-render
+                this.renderTranscript(session);
+                return;
             }
-        } else {
-            // Content was modified or shortened, do full re-render
+        } else if (newMessageBlocks.length < oldMessageBlocks.length || transcriptText !== this.lastTranscriptContent) {
+            // Messages were removed or modified, do full re-render
             this.renderTranscript(session);
             return;
         }
