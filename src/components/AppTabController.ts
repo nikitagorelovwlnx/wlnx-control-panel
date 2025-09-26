@@ -13,7 +13,9 @@ export class AppTabController {
 
     private initialize(): void {
         this.setupEventListeners();
-        this.showTab('dashboard');
+        // Restore last active tab or default to dashboard  
+        const savedTab = localStorage.getItem('activeTab') || 'dashboard';
+        this.showTab(savedTab);
     }
 
     private setupEventListeners(): void {
@@ -138,6 +140,8 @@ export class AppTabController {
         }
 
         this.currentTab = tabId;
+        // Save active tab to localStorage
+        localStorage.setItem('activeTab', tabId);
     }
 
     private async initializePromptsConfig(): Promise<void> {
@@ -169,9 +173,8 @@ export class AppTabController {
     }
 
     private async savePrompts(): Promise<void> {
-        if (this.promptsConfig) {
-            await this.promptsConfig.saveConfiguration();
-        }
+        // This method is no longer used - individual stage save buttons handle saving
+        console.log('Global save prompts called - use individual stage save buttons instead');
     }
 
     private async reloadPrompts(): Promise<void> {

@@ -23,22 +23,23 @@
 }
 
 .panel.sessions-panel {
-    flex: 0 0 0px;
-    opacity: 0;
-    min-width: 0;
+    flex: 0 0 350px;
+    opacity: 1;
+    min-width: 300px;
+    max-width: 500px;
     transition: all 0.2s ease;
     overflow: hidden;
 }
 
 .panel.details-panel {
-    flex: 0 0 0px;
-    opacity: 0;
-    min-width: 0;
+    flex: 1;
+    opacity: 1;
+    min-width: 400px;
     transition: all 0.2s ease;
     overflow: hidden;
 }
 
-/* Active panels use flex to fill remaining space */
+/* Active panels - maintain same behavior as default now */
 .panel.sessions-panel.active {
     flex: 0 0 350px;
     opacity: 1;
@@ -47,17 +48,10 @@
 }
 
 .panel.details-panel.active {
-    flex: 1;
+    flex: 1 1 auto;
     opacity: 1;
     min-width: 400px;
     width: auto;
-}
-
-/* Details panel should always fill remaining space */
-.panel.details-panel.active {
-    flex: 1 1 auto !important;
-    min-width: 400px !important;
-    width: auto !important;
 }
 
 /* Collapsed States */

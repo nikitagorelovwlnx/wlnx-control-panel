@@ -1,10 +1,11 @@
-import { PromptsConfiguration, ConversationStage, Prompt } from '../types/api.js';
+import { PromptsConfiguration } from '../types/api.js';
 import { ApiClient } from '../api/client.js';
 
 export class PromptsConfigurationComponent {
     private container: HTMLElement;
     private apiClient: ApiClient;
     private currentConfig: PromptsConfiguration | null = null;
+    private activeStageId: string = '';
 
     constructor(container: HTMLElement, apiClient: ApiClient) {
         this.container = container;
@@ -40,9 +41,37 @@ export class PromptsConfigurationComponent {
             return;
         }
 
+        // Set first stage as active if none selected
+        if (!this.activeStageId && this.currentConfig.stages.length > 0) {
+            this.activeStageId = this.currentConfig.stages[0].id;
+        }
+
         const html = `
-            <div class="prompts-stages">
-                ${this.currentConfig.stages.map(stage => this.renderStage(stage)).join('')}
+            <div class="prompts-tabs">
+                ${this.currentConfig.stages.map(stage => `
+                    <button class="stage-tab-btn ${stage.id === this.activeStageId ? 'active' : ''}" 
+                            data-stage="${stage.id}">
+                        ${stage.name}
+                    </button>
+                `).join('')}
+            </div>
+            
+            <div class="prompts-tab-content">
+                ${this.currentConfig.stages.map(stage => `
+                    <div class="stage-content ${stage.id === this.activeStageId ? 'active' : ''}" 
+                         data-stage="${stage.id}">
+                        <div class="stage-header">
+                            <div class="stage-actions">
+                                <button class="btn btn-primary" id="save-${stage.id}">Save Stage</button>
+                                <button class="btn btn-secondary" id="reload-${stage.id}">Reload from Server</button>
+                            </div>
+                        </div>
+                        
+                        <div class="stage-prompts">
+                            ${this.renderStagePrompts(stage.id)}
+                        </div>
+                    </div>
+                `).join('')}
             </div>
         `;
 
@@ -50,37 +79,13 @@ export class PromptsConfigurationComponent {
         this.attachEventListeners();
     }
 
-    private renderStage(stage: ConversationStage): string {
-        const stagePrompts = this.currentConfig!.prompts.filter(p => p.stageId === stage.id);
+    private renderStagePrompts(stageId: string): string {
+        const stagePrompts = this.currentConfig!.prompts.filter(p => p.stageId === stageId);
         
-        return `
-            <div class="prompts-stage" data-stage-id="${stage.id}">
-                <div class="stage-header">
-                    <h3>${stage.name}</h3>
-                    <p class="stage-description">${stage.description}</p>
-                    <div class="stage-meta">
-                        <span class="prompt-count">${stagePrompts.length} prompts</span>
-                    </div>
-                </div>
-                <div class="stage-prompts">
-                    ${stagePrompts.map(prompt => this.renderPrompt(prompt)).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    private renderPrompt(prompt: Prompt): string {
-        return `
-            <div class="prompt-item ${prompt.isActive ? 'active' : 'inactive'}" data-prompt-id="${prompt.id}">
+        return stagePrompts.map(prompt => `
+            <div class="prompt-item" data-prompt-id="${prompt.id}">
                 <div class="prompt-header">
-                    <div class="prompt-controls">
-                        <label class="toggle-switch">
-                            <input type="checkbox" ${prompt.isActive ? 'checked' : ''} 
-                                   onchange="window.promptsConfig.togglePrompt('${prompt.id}')">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span class="prompt-order">#${prompt.order}</span>
-                    </div>
+                    <span class="prompt-order">#${prompt.order}</span>
                     <div class="prompt-description">${prompt.description || 'No description'}</div>
                 </div>
                 <div class="prompt-content">
@@ -88,27 +93,68 @@ export class PromptsConfigurationComponent {
                         class="prompt-textarea" 
                         data-prompt-id="${prompt.id}"
                         placeholder="Enter prompt text..."
-                        onchange="window.promptsConfig.updatePromptContent('${prompt.id}', this.value)"
                     >${prompt.content}</textarea>
                 </div>
             </div>
-        `;
+        `).join('');
     }
+
+
 
     private attachEventListeners(): void {
-        // Make this component globally accessible for inline event handlers
-        (window as any).promptsConfig = this;
+        // Stage tab navigation
+        document.querySelectorAll('.stage-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const stageId = (e.target as HTMLElement).getAttribute('data-stage');
+                if (stageId) {
+                    this.showStage(stageId);
+                }
+            });
+        });
+
+        // Save and Reload buttons for each stage
+        this.currentConfig?.stages.forEach(stage => {
+            const saveBtn = document.getElementById(`save-${stage.id}`);
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    this.saveStageConfiguration(stage.id);
+                });
+            }
+            
+            const reloadBtn = document.getElementById(`reload-${stage.id}`);
+            if (reloadBtn) {
+                reloadBtn.addEventListener('click', () => {
+                    this.reloadConfiguration();
+                });
+            }
+        });
+
+        // Textarea change handlers
+        document.querySelectorAll('.prompt-textarea').forEach(textarea => {
+            textarea.addEventListener('change', (e) => {
+                const target = e.target as HTMLTextAreaElement;
+                const promptId = target.getAttribute('data-prompt-id');
+                if (promptId) {
+                    this.updatePromptContent(promptId, target.value);
+                }
+            });
+        });
     }
 
-    public togglePrompt(promptId: string): void {
-        if (!this.currentConfig) return;
+    private showStage(stageId: string): void {
+        this.activeStageId = stageId;
+        
+        // Update tab buttons
+        document.querySelectorAll('.stage-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-stage') === stageId);
+        });
 
-        const prompt = this.currentConfig.prompts.find(p => p.id === promptId);
-        if (prompt) {
-            prompt.isActive = !prompt.isActive;
-            this.updatePromptDisplay(promptId);
-        }
+        // Update tab content
+        document.querySelectorAll('.stage-content').forEach(content => {
+            content.classList.toggle('active', content.getAttribute('data-stage') === stageId);
+        });
     }
+
 
     public updatePromptContent(promptId: string, content: string): void {
         if (!this.currentConfig) return;
@@ -119,44 +165,37 @@ export class PromptsConfigurationComponent {
         }
     }
 
-    private updatePromptDisplay(promptId: string): void {
-        const promptElement = this.container.querySelector(`[data-prompt-id="${promptId}"]`);
-        if (promptElement) {
-            const prompt = this.currentConfig!.prompts.find(p => p.id === promptId);
-            if (prompt) {
-                promptElement.classList.toggle('active', prompt.isActive);
-                promptElement.classList.toggle('inactive', !prompt.isActive);
-            }
-        }
-    }
 
-    public async saveConfiguration(): Promise<void> {
+    public async saveStageConfiguration(stageId: string): Promise<void> {
         if (!this.currentConfig) return;
 
         try {
             // Show saving indicator
-            this.showSaving();
+            this.showSaving(stageId);
             
-            // Update timestamp before saving
-            this.currentConfig.lastUpdated = new Date().toISOString();
+            // Get prompts for this stage
+            const stagePrompts = this.currentConfig.prompts.filter(p => p.stageId === stageId);
             
             // Save to server
-            await this.apiClient.updatePromptsConfiguration(this.currentConfig);
+            await this.apiClient.updateStagePrompts(stageId, stagePrompts);
             
-            this.showSuccess('Configuration saved successfully!');
+            this.showSuccess(`${this.getStageName(stageId)} prompts saved successfully!`);
         } catch (error) {
-            console.error('Failed to save configuration:', error);
-            this.showError('Failed to save configuration');
+            console.error('Failed to save stage configuration:', error);
+            this.showError(`Failed to save ${this.getStageName(stageId)} prompts`);
         }
+    }
+
+    private getStageName(stageId: string): string {
+        const stage = this.currentConfig?.stages.find(s => s.id === stageId);
+        return stage?.name || stageId;
     }
 
     public async reloadConfiguration(): Promise<void> {
         try {
             this.showLoading();
             
-            // Clear localStorage to force reload from server
-            localStorage.removeItem('wlnx-prompts-config');
-            console.log('🔄 Cleared local modifications, reloading from server');
+            console.log('🔄 Reloading configuration from server');
             
             await this.loadConfiguration();
             this.render();
@@ -171,8 +210,8 @@ export class PromptsConfigurationComponent {
         this.container.innerHTML = '<div class="loading">Loading prompts configuration...</div>';
     }
 
-    private showSaving(): void {
-        const saveBtn = document.getElementById('save-prompts') as HTMLButtonElement;
+    private showSaving(stageId: string): void {
+        const saveBtn = document.getElementById(`save-${stageId}`) as HTMLButtonElement;
         if (saveBtn) {
             saveBtn.disabled = true;
             saveBtn.textContent = 'Saving...';
@@ -182,11 +221,14 @@ export class PromptsConfigurationComponent {
     private showSuccess(message: string): void {
         this.showMessage(message, 'success');
         
-        const saveBtn = document.getElementById('save-prompts') as HTMLButtonElement;
-        if (saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Configuration';
-        }
+        // Reset all save buttons
+        this.currentConfig?.stages.forEach(stage => {
+            const saveBtn = document.getElementById(`save-${stage.id}`) as HTMLButtonElement;
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Stage';
+            }
+        });
     }
 
     private showError(message: string): void {

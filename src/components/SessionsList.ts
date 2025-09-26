@@ -52,14 +52,22 @@ export class SessionsList {
                     <span class="session-date">${date}</span>
                     <span class="session-id">#${session.id.substring(0, 8)}</span>
                     <div class="session-actions">
-                        <button class="delete-btn" data-session-id="${session.id}" title="Delete session">
+                        <button class="session-delete-btn" data-session-id="${session.id}" title="Delete session">
                             <svg class="delete-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             </svg>
                         </button>
                         <div class="confirm-actions" style="display: none;">
-                            <button class="confirm-yes" data-session-id="${session.id}" title="Yes, delete">Yes</button>
-                            <button class="confirm-no" data-session-id="${session.id}" title="No, cancel">No</button>
+                            <button class="confirm-yes" data-session-id="${session.id}" title="Yes, delete">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button class="confirm-no" data-session-id="${session.id}" title="No, cancel">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -124,15 +132,14 @@ export class SessionsList {
                     
                     // Add active class to clicked card
                     sessionCard.classList.add('active', 'selected');
-                    
                     this.onSessionSelectCallback(sessionId);
                 }
                 return;
             }
             
-            // Handle delete button click
-            if (target.closest('.delete-btn')) {
-                const deleteBtn = target.closest('.delete-btn') as HTMLElement;
+            // Handle delete session button click
+            if (target.closest('.session-delete-btn')) {
+                const deleteBtn = target.closest('.session-delete-btn') as HTMLElement;
                 const sessionId = deleteBtn.getAttribute('data-session-id');
                 if (sessionId) {
                     this.showConfirmDialog(sessionId);
@@ -165,7 +172,7 @@ export class SessionsList {
     private showConfirmDialog(sessionId: string): void {
         const sessionCard = this.container.querySelector(`[data-session-id="${sessionId}"]`);
         if (sessionCard) {
-            const deleteBtn = sessionCard.querySelector('.delete-btn') as HTMLElement;
+            const deleteBtn = sessionCard.querySelector('.session-delete-btn') as HTMLElement;
             const confirmActions = sessionCard.querySelector('.confirm-actions') as HTMLElement;
             
             if (deleteBtn && confirmActions) {
@@ -178,7 +185,7 @@ export class SessionsList {
     private hideConfirmDialog(sessionId: string): void {
         const sessionCard = this.container.querySelector(`[data-session-id="${sessionId}"]`);
         if (sessionCard) {
-            const deleteBtn = sessionCard.querySelector('.delete-btn') as HTMLElement;
+            const deleteBtn = sessionCard.querySelector('.session-delete-btn') as HTMLElement;
             const confirmActions = sessionCard.querySelector('.confirm-actions') as HTMLElement;
             
             if (deleteBtn && confirmActions) {
