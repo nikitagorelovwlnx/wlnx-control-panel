@@ -21,10 +21,11 @@ export class ControlPanel {
         await this.loadInitialData();
         this.setupEventHandlers();
         
-        // Start periodic status checks
+        // Start periodic data refresh - very fast polling for instant updates
         setInterval(() => {
             this.checkSystemStatus();
-        }, 30000); // Check every 30 seconds
+            this.refreshData();
+        }, 500); // Check every 0.5 seconds for instant updates
     }
 
     private setupEventHandlers(): void {
@@ -115,6 +116,21 @@ export class ControlPanel {
         if (this.appTabController.getCurrentTab() === 'prompts') {
             console.log('Refreshing prompts configuration...');
             await this.appTabController.refreshPromptsConfiguration();
+        }
+    }
+
+    private async refreshData(): Promise<void> {
+        // Silent refresh without logging to avoid spam in console
+        try {
+            await this.panelsController.refreshSilently();
+            
+            // Refresh prompts configuration if on prompts tab
+            if (this.appTabController.getCurrentTab() === 'prompts') {
+                await this.appTabController.refreshPromptsConfiguration();
+            }
+        } catch (error) {
+            // Silent error handling - don't spam console with errors
+            console.debug('Silent refresh failed:', error);
         }
     }
 }

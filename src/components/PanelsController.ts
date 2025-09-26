@@ -245,6 +245,32 @@ export class PanelsController {
         this.startUsersPolling();
     }
 
+    public async refreshSilently(): Promise<void> {
+        // Silent refresh without closing panels or logging
+        try {
+            // Only refresh users list silently
+            const users = await this.apiClient.getUsers();
+            this.usersList.render(users);
+            
+            // If we have a current session, refresh its details silently
+            if (this.currentSession) {
+                const updatedSessions = await this.apiClient.getInterviews(this.currentUser?.email || '');
+                const updatedSession = updatedSessions.find((s: Interview) => s.id === this.currentSession?.id);
+                if (updatedSession) {
+                    this.currentSession = updatedSession;
+                    this.sessionDetails.updateContent(updatedSession, {
+                        summary: true,
+                        transcript: true,
+                        wellness: true
+                    });
+                }
+            }
+        } catch (error) {
+            // Silent error handling
+            console.debug('Silent refresh failed:', error);
+        }
+    }
+
     private async deleteAllUserSessions(userEmail?: string): Promise<void> {
         const emailToDelete = userEmail || this.currentUser?.email;
         if (!emailToDelete) {
