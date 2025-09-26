@@ -1,0 +1,405 @@
+/* UI Components Styles - Users, Sessions, Details, Forms, etc. */
+
+/* Polling Indicator */
+.polling-indicator {
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+}
+
+.polling-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 0.3; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.2);
+    }
+}
+
+/* Users List */
+.users-container {
+    overflow-y: auto;
+    height: 100%;
+}
+
+.user-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.user-card:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.user-card.active, .user-card.selected {
+    background: rgba(37, 99, 235, 0.08);
+    border-left: 3px solid var(--accent);
+}
+
+.user-card.active .user-avatar, .user-card.selected .user-avatar {
+    background: var(--accent);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+}
+
+.user-info .user-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex: 1;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.delete-all-user-sessions-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.delete-all-user-sessions-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--error);
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+.user-details h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.user-details p {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 2px 0 0 0;
+}
+
+.user-stats {
+    display: flex;
+    gap: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+
+.stat-value {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* Sessions List */
+.sessions-container {
+    padding: var(--space-sm);
+    flex: 1;
+    overflow-y: auto;
+}
+
+.session-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.session-card:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.session-card.active, .session-card.selected {
+    background: rgba(37, 99, 235, 0.08);
+    border-left: 3px solid var(--accent);
+}
+
+.session-info {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+/* Session Actions */
+.session-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+}
+
+.session-view-btn, .session-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.session-view-btn:hover {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--accent);
+}
+
+.session-delete-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--error);
+}
+
+.session-summary {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-bottom: var(--space-sm);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.session-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-sm);
+}
+
+.session-tag {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 2px var(--space-xs);
+    border-radius: var(--radius);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.session-metadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+}
+
+.interview-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+}
+
+.interview-link:hover {
+    text-decoration: underline;
+}
+
+/* Delete All Button */
+.delete-all-btn {
+    background: none;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--error);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: var(--space-sm);
+}
+
+.delete-all-btn:hover {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: var(--error);
+}
+
+/* Details Panel */
+.details-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 600px;
+}
+
+/* Tab Navigation */
+.details-tabs {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border);
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.tab-btn.active {
+    color: var(--accent);
+    background: var(--bg-primary);
+    border-bottom-color: var(--accent);
+}
+
+.tab-btn:hover:not(.active) {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.tab-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--border);
+    border-top: 2px solid var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Tab Content */
+.tab-content-container {
+    flex: 1;
+    overflow: hidden;
+}
+
+.tab-content {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+.tab-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-lg);
+    background: var(--bg-primary);
+}
+
+.empty-selection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    font-size: var(--font-size-lg);
+    text-align: center;
+}
+
+/* Loading & Error States */
+.loading, .error-state, .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.loading h3, .error-state h3, .empty-state h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.loading p, .error-state p, .empty-state p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.error-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-xl);
+    color: var(--error);
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius);
+    margin: var(--space-md);
+}
+
+/* Animation for messages */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

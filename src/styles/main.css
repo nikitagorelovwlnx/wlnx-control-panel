@@ -1,0 +1,7 @@
+/* Main CSS - Import all style modules */
+
+@import './base.css';
+@import './layout.css';
+@import './panels.css';
+@import './components.css';
+@import './prompts.css';

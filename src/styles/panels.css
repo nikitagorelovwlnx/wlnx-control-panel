@@ -1,0 +1,222 @@
+/* Panels Styles - Dashboard Panels (Users, Sessions, Details) */
+
+/* Panels */
+.panel {
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.panel:last-child {
+    border-right: none;
+}
+
+.panel.users-panel {
+    flex: 0 0 320px;
+    min-width: 280px;
+    max-width: 500px;
+    transition: all 0.2s ease;
+}
+
+.panel.sessions-panel {
+    flex: 0 0 0px;
+    opacity: 0;
+    min-width: 0;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.panel.details-panel {
+    flex: 0 0 0px;
+    opacity: 0;
+    min-width: 0;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+/* Active panels use flex to fill remaining space */
+.panel.sessions-panel.active {
+    flex: 0 0 350px;
+    opacity: 1;
+    min-width: 350px;
+    max-width: 500px;
+}
+
+.panel.details-panel.active {
+    flex: 1;
+    opacity: 1;
+    min-width: 400px;
+    width: auto;
+}
+
+/* Details panel should always fill remaining space */
+.panel.details-panel.active {
+    flex: 1 1 auto !important;
+    min-width: 400px !important;
+    width: auto !important;
+}
+
+/* Collapsed States */
+.panel.collapsed {
+    flex: 0 0 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+}
+
+.panel.collapsed .panel-content {
+    display: none;
+}
+
+.panel.collapsed .panel-header {
+    padding: var(--space-sm);
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.panel.collapsed .panel-header h2 {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 11px;
+    white-space: nowrap;
+    margin: 0;
+    transform: rotate(180deg);
+}
+
+.panel.collapsed .panel-subtitle,
+.panel.collapsed .close-panel-btn {
+    display: none;
+}
+
+.panel.collapsed .panel-header-actions {
+    margin-top: var(--space-sm);
+}
+
+.panel.collapsed .collapse-panel-btn {
+    transform: rotate(90deg);
+}
+
+/* Panel Headers */
+.panel-header {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+.panel-header h2 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.panel-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panel-header-left {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.panel-header-actions {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.collapse-panel-btn, .close-panel-btn {
+    background: none;
+    border: none;
+    padding: var(--space-xs);
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: var(--radius);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.collapse-panel-btn:hover, .close-panel-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Panel Content */
+.panel-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Panel Resizers */
+.panel-resizer {
+    flex: 0 0 4px;
+    background: var(--border-light);
+    cursor: col-resize;
+    position: relative;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.panel-resizer:hover, .panel-resizer.active {
+    background: var(--border-medium);
+    opacity: 1;
+}
+
+.panel-resizer.vertical {
+    cursor: row-resize;
+    flex: 0 0 4px;
+    background: var(--border-light);
+}
+
+.panel-resizer.vertical:hover {
+    opacity: 0.8;
+}
+
+.panel-resizer.dragging {
+    background: var(--accent);
+    opacity: 1;
+}
+
+.resizer-handle {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resizer-handle::after {
+    content: '';
+    width: 2px;
+    height: 20px;
+    background: var(--border-dark);
+    border-radius: 1px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.panel-resizer:hover .resizer-handle::after {
+    opacity: 1;
+}
