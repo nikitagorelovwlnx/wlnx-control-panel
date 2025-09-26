@@ -10,7 +10,7 @@
 
 .prompts-content {
     flex: 1;
-    padding: var(--space-lg);
+    padding: 2px var(--space-md) var(--space-md) var(--space-md);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -21,7 +21,7 @@
 .prompts-container .prompts-tabs {
     display: flex;
     border-bottom: 1px solid var(--border);
-    margin-bottom: var(--space-lg);
+    margin-bottom: 2px;
     overflow-x: auto;
 }
 
@@ -71,9 +71,9 @@
 }
 
 .prompts-container .stage-header {
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-md);
-    border-bottom: 1px solid var(--border-light);
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-bottom: 2px;
     flex-shrink: 0;
 }
 
@@ -90,6 +90,7 @@
     align-items: stretch;
     flex: 1;
     min-height: 0; /* Allow grid to shrink if needed */
+    margin-top: 15px;
 }
 
 .prompts-container .stage-prompts .prompt-item:nth-child(1) {
@@ -152,9 +153,76 @@
     border-color: var(--border-medium);
 }
 
+.btn.btn-danger {
+    background: #ec4899;
+    color: white;
+    border-color: #ec4899;
+}
+
+.btn.btn-danger:hover {
+    background: #db2777;
+    border-color: #db2777;
+}
+
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* Restore Confirmation Actions */
+.restore-confirm-actions {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.restore-confirm-actions .confirm-yes, 
+.restore-confirm-actions .confirm-no {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.restore-confirm-actions .confirm-yes {
+    color: var(--success);
+}
+
+.restore-confirm-actions .confirm-yes:hover {
+    background: rgba(22, 163, 74, 0.15);
+    color: var(--success);
+    transform: scale(1.1);
+}
+
+.restore-confirm-actions .confirm-no {
+    color: var(--error);
+}
+
+.restore-confirm-actions .confirm-no:hover {
+    background: rgba(220, 38, 38, 0.15);
+    color: var(--error);
+    transform: scale(1.1);
+}
+
+.restore-confirm-actions .confirm-yes svg, 
+.restore-confirm-actions .confirm-no svg {
+    transition: all 0.2s ease;
+}
+
+.restore-confirm-actions .confirm-yes:hover svg {
+    stroke-width: 2.5;
+}
+
+.restore-confirm-actions .confirm-no:hover svg {
+    stroke-width: 2.5;
 }
 
 
@@ -174,7 +242,6 @@
 .stage-header {
     background: var(--bg-secondary);
     padding: var(--space-md);
-    border-bottom: 1px solid var(--border);
 }
 
 .stage-header h3 {

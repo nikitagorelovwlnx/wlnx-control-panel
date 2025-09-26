@@ -55,15 +55,25 @@ export class PromptsConfigurationComponent {
                     </button>
                 `).join('')}
             </div>
-            
-            <div class="prompts-tab-content">
                 ${this.currentConfig.stages.map(stage => `
                     <div class="stage-content ${stage.id === this.activeStageId ? 'active' : ''}" 
                          data-stage="${stage.id}">
                         <div class="stage-header">
                             <div class="stage-actions">
                                 <button class="btn btn-primary" id="save-${stage.id}">Save Stage</button>
-                                <button class="btn btn-secondary" id="reload-${stage.id}">Reload from Server</button>
+                                <button class="btn btn-danger" id="restore-${stage.id}">Restore Defaults</button>
+                                <div class="restore-confirm-actions" style="display: none;" id="confirm-${stage.id}">
+                                    <button class="confirm-yes" data-stage-id="${stage.id}" title="Yes, restore defaults">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                    <button class="confirm-no" data-stage-id="${stage.id}" title="No, cancel">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -121,21 +131,42 @@ export class PromptsConfigurationComponent {
                 });
             }
             
-            const reloadBtn = document.getElementById(`reload-${stage.id}`);
-            if (reloadBtn) {
-                reloadBtn.addEventListener('click', () => {
-                    this.reloadConfiguration();
+            const restoreBtn = document.getElementById(`restore-${stage.id}`);
+            if (restoreBtn) {
+                restoreBtn.addEventListener('click', () => {
+                    this.showRestoreConfirmDialog(stage.id);
                 });
             }
         });
 
         // Textarea change handlers
         document.querySelectorAll('.prompt-textarea').forEach(textarea => {
-            textarea.addEventListener('change', (e) => {
+            // Handle both 'change' (when losing focus) and 'input' (while typing)
+            const updateHandler = (e: Event) => {
                 const target = e.target as HTMLTextAreaElement;
                 const promptId = target.getAttribute('data-prompt-id');
                 if (promptId) {
                     this.updatePromptContent(promptId, target.value);
+                }
+            };
+            
+            textarea.addEventListener('change', updateHandler);
+            textarea.addEventListener('input', updateHandler);
+        });
+
+        // Restore confirmation handlers
+        document.querySelectorAll('.confirm-yes, .confirm-no').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.target as HTMLElement;
+                const button = target.closest('button') as HTMLButtonElement;
+                const stageId = button.getAttribute('data-stage-id');
+                
+                if (stageId) {
+                    if (button.classList.contains('confirm-yes')) {
+                        this.restoreStageDefaults(stageId);
+                    } else {
+                        this.hideRestoreConfirmDialog(stageId);
+                    }
                 }
             });
         });
@@ -165,6 +196,25 @@ export class PromptsConfigurationComponent {
         }
     }
 
+    private syncPromptsFromTextareas(): void {
+        if (!this.currentConfig) return;
+
+        // Get all textarea elements and update corresponding prompts
+        const textareas = document.querySelectorAll('.prompt-textarea') as NodeListOf<HTMLTextAreaElement>;
+        
+        textareas.forEach(textarea => {
+            const promptId = textarea.getAttribute('data-prompt-id');
+            if (promptId) {
+                const currentValue = textarea.value;
+                const prompt = this.currentConfig!.prompts.find(p => p.id === promptId);
+                if (prompt) {
+                    prompt.content = currentValue;
+                    console.log(`📝 Updated prompt ${promptId} with content length:`, currentValue.length);
+                }
+            }
+        });
+    }
+
 
     public async saveStageConfiguration(stageId: string): Promise<void> {
         if (!this.currentConfig) return;
@@ -173,8 +223,13 @@ export class PromptsConfigurationComponent {
             // Show saving indicator
             this.showSaving(stageId);
             
+            // Update all prompt contents from current textarea values BEFORE saving
+            this.syncPromptsFromTextareas();
+            
             // Get prompts for this stage
             const stagePrompts = this.currentConfig.prompts.filter(p => p.stageId === stageId);
+            
+            console.log('💾 Saving prompts for stage:', stageId, stagePrompts);
             
             // Save to server
             await this.apiClient.updateStagePrompts(stageId, stagePrompts);
@@ -183,6 +238,76 @@ export class PromptsConfigurationComponent {
         } catch (error) {
             console.error('Failed to save stage configuration:', error);
             this.showError(`Failed to save ${this.getStageName(stageId)} prompts`);
+        }
+    }
+
+    private showRestoreConfirmDialog(stageId: string): void {
+        const restoreBtn = document.getElementById(`restore-${stageId}`);
+        const confirmActions = document.getElementById(`confirm-${stageId}`);
+        
+        if (restoreBtn && confirmActions) {
+            restoreBtn.style.display = 'none';
+            confirmActions.style.display = 'flex';
+        }
+    }
+
+    private hideRestoreConfirmDialog(stageId: string): void {
+        const restoreBtn = document.getElementById(`restore-${stageId}`);
+        const confirmActions = document.getElementById(`confirm-${stageId}`);
+        
+        if (restoreBtn && confirmActions) {
+            restoreBtn.style.display = 'block';
+            confirmActions.style.display = 'none';
+        }
+    }
+
+    public async restoreStageDefaults(stageId: string): Promise<void> {
+        if (!this.currentConfig) return;
+
+        try {
+            // Hide confirmation dialog
+            this.hideRestoreConfirmDialog(stageId);
+
+            // Show saving indicator on restore button
+            const restoreBtn = document.getElementById(`restore-${stageId}`) as HTMLButtonElement;
+            if (restoreBtn) {
+                restoreBtn.disabled = true;
+                restoreBtn.textContent = 'Restoring...';
+            }
+
+            // Get stage name and prompts for this stage
+            const stageName = this.getStageName(stageId);
+            const stagePrompts = this.currentConfig.prompts.filter(p => p.stageId === stageId);
+            
+            // Clear prompt contents (set to empty string, which will be saved as null)
+            stagePrompts.forEach(prompt => {
+                prompt.content = '';
+            });
+
+            console.log('🔄 Restoring defaults for stage:', stageId, 'Clearing', stagePrompts.length, 'prompts');
+
+            // Save cleared prompts to server
+            await this.apiClient.updateStagePrompts(stageId, stagePrompts);
+
+            // Update UI - clear all textareas for this stage
+            stagePrompts.forEach(prompt => {
+                const textarea = document.querySelector(`textarea[data-prompt-id="${prompt.id}"]`) as HTMLTextAreaElement;
+                if (textarea) {
+                    textarea.value = '';
+                }
+            });
+
+            this.showSuccess(`${stageName} prompts restored to defaults and saved!`);
+        } catch (error) {
+            console.error('Failed to restore stage defaults:', error);
+            this.showError(`Failed to restore ${this.getStageName(stageId)} defaults`);
+        } finally {
+            // Reset restore button
+            const restoreBtn = document.getElementById(`restore-${stageId}`) as HTMLButtonElement;
+            if (restoreBtn) {
+                restoreBtn.disabled = false;
+                restoreBtn.textContent = 'Restore Defaults';
+            }
         }
     }
 
