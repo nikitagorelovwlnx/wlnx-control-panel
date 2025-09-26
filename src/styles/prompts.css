@@ -12,6 +12,9 @@
     flex: 1;
     padding: var(--space-lg);
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 /* Stage Tabs */
@@ -48,6 +51,9 @@
 .prompts-container .prompts-tab-content {
     flex: 1;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .prompts-container .stage-content {
@@ -59,12 +65,16 @@
 
 .prompts-container .stage-content.active {
     display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
 }
 
 .prompts-container .stage-header {
     margin-bottom: var(--space-md);
     padding-bottom: var(--space-md);
     border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
 }
 
 .prompts-container .stage-actions {
@@ -75,8 +85,11 @@
 .prompts-container .stage-prompts {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
     gap: var(--space-lg);
-    align-items: start;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0; /* Allow grid to shrink if needed */
 }
 
 .prompts-container .stage-prompts .prompt-item:nth-child(1) {
@@ -144,11 +157,6 @@
     cursor: not-allowed;
 }
 
-.prompts-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: var(--space-sm);
-}
 
 .prompts-stages {
     display: flex;
@@ -200,6 +208,9 @@
 .prompts-container .prompt-item {
     background: transparent;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .prompts-container .prompt-header {
@@ -207,6 +218,7 @@
     align-items: center;
     gap: var(--space-md);
     margin-bottom: var(--space-md);
+    flex-shrink: 0;
 }
 
 .prompts-container .prompt-order {
@@ -229,11 +241,15 @@
 
 .prompts-container .prompt-content {
     width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .prompts-container .prompt-textarea {
     width: 100%;
-    min-height: 120px;
+    flex: 1;
+    min-height: 0;
     padding: var(--space-lg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -242,8 +258,9 @@
     line-height: 1.6;
     color: var(--text-primary);
     background: var(--bg-primary);
-    resize: vertical;
+    resize: none;
     transition: border-color 0.2s ease;
+    box-sizing: border-box;
 }
 
 .prompts-container .prompt-textarea:focus {
