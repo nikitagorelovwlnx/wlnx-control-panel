@@ -8,11 +8,17 @@ export class WellnessForm {
     }
 
     public render(wellnessData?: WellnessData): void {
+        console.log('WellnessForm.render called with:', wellnessData);
+        console.log('WellnessData type:', typeof wellnessData);
+        console.log('WellnessData is null/undefined:', wellnessData == null);
+        
         if (!wellnessData) {
+            console.log('Rendering empty state - no wellness data');
             this.renderEmptyState();
             return;
         }
 
+        console.log('Rendering form with wellness data');
         this.renderForm(wellnessData);
     }
 

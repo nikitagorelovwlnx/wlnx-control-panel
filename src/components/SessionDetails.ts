@@ -267,7 +267,10 @@ export class SessionDetails {
 
     private renderWellness(session: Interview): void {
         console.log('Rendering wellness data for session:', session.id);
+        console.log('Full session object:', session);
         console.log('Wellness data:', session.wellness_data);
+        console.log('Wellness data type:', typeof session.wellness_data);
+        console.log('Wellness data keys:', session.wellness_data ? Object.keys(session.wellness_data) : 'No wellness data');
         
         this.wellnessForm.render(session.wellness_data);
     }
