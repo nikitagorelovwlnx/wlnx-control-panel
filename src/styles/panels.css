@@ -23,35 +23,38 @@
 }
 
 .panel.sessions-panel {
-    flex: 0 0 350px;
-    opacity: 1;
-    min-width: 300px;
-    max-width: 500px;
+    flex: 0 0 0px;
+    opacity: 0;
+    min-width: 0px;
+    max-width: 0px;
     transition: all 0.2s ease;
     overflow: hidden;
+    pointer-events: none;
 }
 
 .panel.details-panel {
-    flex: 1;
-    opacity: 1;
-    min-width: 400px;
+    flex: 0 0 0px;
+    opacity: 0;
+    min-width: 0px;
     transition: all 0.2s ease;
     overflow: hidden;
+    pointer-events: none;
 }
 
-/* Active panels - maintain same behavior as default now */
+/* Active panels */
 .panel.sessions-panel.active {
     flex: 0 0 350px;
     opacity: 1;
     min-width: 350px;
     max-width: 500px;
+    pointer-events: auto;
 }
 
 .panel.details-panel.active {
     flex: 1 1 auto;
     opacity: 1;
     min-width: 400px;
-    width: auto;
+    pointer-events: auto;
 }
 
 /* Collapsed States */
