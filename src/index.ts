@@ -122,12 +122,11 @@ export class ControlPanel {
     private async refreshData(): Promise<void> {
         // Silent refresh without logging to avoid spam in console
         try {
-            await this.panelsController.refreshSilently();
-            
-            // Refresh prompts configuration if on prompts tab
-            if (this.appTabController.getCurrentTab() === 'prompts') {
-                await this.appTabController.refreshPromptsConfiguration();
+            // Only refresh dashboard data, skip prompts tab
+            if (this.appTabController.getCurrentTab() === 'dashboard') {
+                await this.panelsController.refreshSilently();
             }
+            // Prompts tab doesn't need polling - prompts only change manually
         } catch (error) {
             // Silent error handling - don't spam console with errors
             console.debug('Silent refresh failed:', error);
