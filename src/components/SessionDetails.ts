@@ -246,44 +246,47 @@ export class SessionDetails {
     private formatTranscriptAsDialog(transcript: string): string {
         if (!transcript) return '<div class="no-transcript">No transcript available</div>';
         
-        // Split transcript into lines and format as dialog
-        const lines = transcript.split('\n').filter(line => line.trim());
+        // Parse structured transcript with sender tags [SYSTEM], [USER], [ASSISTANT]
+        const messageBlocks = transcript.split('\n\n').filter(block => block.trim());
         let dialogHtml = '';
         
-        for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) continue;
+        for (const block of messageBlocks) {
+            const trimmedBlock = block.trim();
+            if (!trimmedBlock) continue;
             
-            // Try to detect if it's a speaker line (contains colon)
-            const colonIndex = trimmedLine.indexOf(':');
-            if (colonIndex > 0 && colonIndex < 50) { // Reasonable speaker name length
-                const speaker = trimmedLine.substring(0, colonIndex).trim();
-                const message = trimmedLine.substring(colonIndex + 1).trim();
-                
-                // Determine if it's user or assistant
-                const isUser = speaker.toLowerCase().includes('user') || 
-                              speaker.toLowerCase().includes('patient') ||
-                              speaker.toLowerCase().includes('client');
-                
-                dialogHtml += `
-                    <div class="dialog-message ${isUser ? 'user-message' : 'assistant-message'}">
-                        <div class="speaker-avatar">${isUser ? '👤' : '🤖'}</div>
-                        <div class="message-content">
-                            <div class="speaker-name">${this.escapeHtml(speaker)}</div>
-                            <div class="message-text">${this.escapeHtml(message)}</div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                // Regular text line
-                dialogHtml += `
-                    <div class="dialog-message system-message">
-                        <div class="message-content">
-                            <div class="message-text">${this.escapeHtml(trimmedLine)}</div>
-                        </div>
-                    </div>
-                `;
+            let messageType = 'system';
+            let senderName = 'System';
+            let avatar = '📝';
+            let content = trimmedBlock;
+            
+            // Parse message type based on tags
+            if (trimmedBlock.startsWith('[SYSTEM]')) {
+                messageType = 'system';
+                senderName = 'System';
+                avatar = '📝';
+                content = trimmedBlock.replace('[SYSTEM] ', '');
+            } else if (trimmedBlock.startsWith('[USER]')) {
+                messageType = 'user';
+                senderName = 'User';
+                avatar = '👤';
+                content = trimmedBlock.replace('[USER] ', '');
+            } else if (trimmedBlock.startsWith('[ASSISTANT]')) {
+                messageType = 'assistant';
+                senderName = 'Anna';
+                avatar = '🤖';
+                content = trimmedBlock.replace('[ASSISTANT] ', '');
             }
+            
+            // Format message with proper styling
+            dialogHtml += `
+                <div class="dialog-message ${messageType}-message">
+                    <div class="speaker-avatar">${avatar}</div>
+                    <div class="message-content">
+                        <div class="speaker-name">${senderName}</div>
+                        <div class="message-text">${this.escapeHtml(content)}</div>
+                    </div>
+                </div>
+            `;
         }
         
         return dialogHtml || '<div class="no-transcript">Unable to parse transcript</div>';
