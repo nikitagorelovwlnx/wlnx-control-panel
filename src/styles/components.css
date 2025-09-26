@@ -251,6 +251,18 @@
     transition: all 0.2s ease;
 }
 
+/* Prevent pulsing animation during polling updates */
+.confirm-actions.no-animation .confirm-yes,
+.confirm-actions.no-animation .confirm-no {
+    animation: none !important;
+    transition: none !important;
+}
+
+.confirm-actions.no-animation .confirm-yes svg,
+.confirm-actions.no-animation .confirm-no svg {
+    transition: none !important;
+}
+
 .confirm-yes:hover svg {
     stroke-width: 2.5;
 }

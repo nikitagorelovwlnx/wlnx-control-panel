@@ -6,6 +6,8 @@ export class UsersList {
     private onDeleteAllSessionsCallback?: (userEmail: string) => void;
     private usersInterviews: Map<string, Interview[]> = new Map();
     private users: User[] = [];
+    private openConfirmDialogs: Set<string> = new Set(); // Track which users have open confirm dialogs
+    private selectedUserEmail: string | null = null; // Track selected user
 
     constructor(containerSelector: string) {
         this.container = document.getElementById(containerSelector)!;
@@ -31,11 +33,17 @@ export class UsersList {
             return;
         }
 
+        // Save current UI state before re-rendering
+        this.saveUIState();
+
         const userCards = users.map(user => this.createModernUserCard(user)).join('');
         this.container.innerHTML = userCards;
         
         // Add click handlers
         this.addClickHandlers();
+        
+        // Restore UI state after re-rendering
+        this.restoreUIState();
     }
     
     private createModernUserCard(user: User): string {
@@ -102,6 +110,9 @@ export class UsersList {
                     // Add active class to clicked card
                     userCard.classList.add('active', 'selected');
                     
+                    // Save selected user
+                    this.selectedUserEmail = userEmail;
+                    
                     this.onUserSelectCallback(userEmail);
                 }
                 return;
@@ -148,6 +159,7 @@ export class UsersList {
             if (deleteBtn && confirmActions) {
                 deleteBtn.style.display = 'none';
                 confirmActions.style.display = 'flex';
+                this.openConfirmDialogs.add(userEmail);
             }
         }
     }
@@ -161,6 +173,7 @@ export class UsersList {
             if (deleteBtn && confirmActions) {
                 deleteBtn.style.display = 'block';
                 confirmActions.style.display = 'none';
+                this.openConfirmDialogs.delete(userEmail);
             }
         }
     }
@@ -210,5 +223,56 @@ export class UsersList {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    private saveUIState(): void {
+        // Save which confirm dialogs are open
+        this.openConfirmDialogs.clear();
+        const openDialogs = this.container.querySelectorAll('.confirm-actions[style*="flex"]');
+        openDialogs.forEach(dialog => {
+            const userCard = dialog.closest('.user-card');
+            if (userCard) {
+                const userEmail = userCard.getAttribute('data-user-email');
+                if (userEmail) {
+                    this.openConfirmDialogs.add(userEmail);
+                }
+            }
+        });
+
+        // Save selected user
+        const selectedCard = this.container.querySelector('.user-card.selected');
+        if (selectedCard) {
+            this.selectedUserEmail = selectedCard.getAttribute('data-user-email');
+        } else {
+            this.selectedUserEmail = null;
+        }
+    }
+
+    private restoreUIState(): void {
+        // Temporarily disable animations during state restoration
+        const confirmActions = this.container.querySelectorAll('.confirm-actions');
+        confirmActions.forEach(action => {
+            action.classList.add('no-animation');
+        });
+
+        // Restore confirm dialogs
+        this.openConfirmDialogs.forEach(userEmail => {
+            this.showConfirmDialog(userEmail);
+        });
+
+        // Restore selected user
+        if (this.selectedUserEmail) {
+            const userCard = this.container.querySelector(`[data-user-email="${this.selectedUserEmail}"]`);
+            if (userCard) {
+                userCard.classList.add('active', 'selected');
+            }
+        }
+
+        // Re-enable animations after a short delay
+        setTimeout(() => {
+            confirmActions.forEach(action => {
+                action.classList.remove('no-animation');
+            });
+        }, 100);
     }
 }
