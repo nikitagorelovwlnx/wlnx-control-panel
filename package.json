@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w & live-server --port=3000 --host=localhost --entry-file=index.html",
-    "start": "live-server --port=3000 --host=localhost --entry-file=index.html",
+    "start": "live-server --port=${PORT:-3000} --host=0.0.0.0 --entry-file=index.html",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -19,6 +19,9 @@
     "test:prompts": "jest tests/functional/prompts-configuration.test.ts",
     "test:prompts-api": "jest tests/functional/prompts-api.test.ts"
   },
+  "dependencies": {
+    "live-server": "^1.2.2"
+  },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
@@ -26,7 +29,6 @@
     "@types/node": "^20.8.0",
     "jest": "^30.1.3",
     "jest-environment-jsdom": "^30.1.2",
-    "live-server": "^1.2.2",
     "msw": "^2.11.2",
     "text-encoding": "^0.7.0",
     "ts-jest": "^29.4.3",

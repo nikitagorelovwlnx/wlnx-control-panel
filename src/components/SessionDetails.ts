@@ -8,6 +8,7 @@ export class SessionDetails {
     private wellnessContainer: HTMLElement;
     private tabsController: TabsController;
     private wellnessForm: WellnessForm;
+    private lastTranscriptContent: string = '';
 
     constructor(detailsContainer: HTMLElement) {
         this.summaryContainer = detailsContainer.querySelector('#summary-content')!;
@@ -115,6 +116,7 @@ export class SessionDetails {
                     <p>No transcription available for this session.</p>
                 </div>
             `;
+            this.lastTranscriptContent = '';
             return;
         }
 
@@ -133,6 +135,9 @@ export class SessionDetails {
             transcriptText = JSON.stringify(transcriptionData, null, 2);
         }
 
+        // Store current content for smooth updates
+        this.lastTranscriptContent = transcriptText;
+
         // Format transcript as a dialog
         const dialogHtml = this.formatTranscriptAsDialog(transcriptText);
         
@@ -144,7 +149,7 @@ export class SessionDetails {
                         <span class="transcript-length">${transcriptText.length} characters</span>
                     </div>
                 </div>
-                <div class="dialog-content">
+                <div class="dialog-content" id="dialog-content-${session.id}">
                     ${dialogHtml}
                 </div>
             </div>
@@ -154,6 +159,79 @@ export class SessionDetails {
         console.log('Transcript HTML length:', transcriptHtml.length);
         this.transcriptContainer.innerHTML = transcriptHtml;
         console.log('Transcript container after setting HTML:', this.transcriptContainer.innerHTML);
+    }
+
+    private updateTranscriptSmoothly(session: Interview): void {
+        // Get current transcription data
+        const transcriptionData = session.transcription || 
+                                 (session as any).transcript || 
+                                 (session as any).messages || 
+                                 (session as any).content ||
+                                 (session as any).conversation ||
+                                 (session as any).text;
+        
+        if (!transcriptionData) return;
+
+        // Convert to string
+        let transcriptText = '';
+        if (typeof transcriptionData === 'string') {
+            transcriptText = transcriptionData;
+        } else if (Array.isArray(transcriptionData)) {
+            transcriptText = transcriptionData.map(item => {
+                if (typeof item === 'string') return item;
+                if (item.content) return item.content;
+                if (item.text) return item.text;
+                return JSON.stringify(item);
+            }).join('\n');
+        } else {
+            transcriptText = JSON.stringify(transcriptionData, null, 2);
+        }
+
+        // Check if content has changed
+        if (transcriptText === this.lastTranscriptContent) {
+            return; // No changes, don't update
+        }
+
+        // Find the dialog content container
+        const dialogContentEl = document.getElementById(`dialog-content-${session.id}`);
+        if (!dialogContentEl) {
+            // Fallback to full re-render if container not found
+            this.renderTranscript(session);
+            return;
+        }
+
+        // Check if new content is longer (new messages added)
+        if (transcriptText.length > this.lastTranscriptContent.length && 
+            transcriptText.startsWith(this.lastTranscriptContent)) {
+            
+            // Extract only the new content
+            const newContent = transcriptText.substring(this.lastTranscriptContent.length);
+            const newMessages = this.formatTranscriptAsDialog(newContent);
+            
+            // Append new messages without re-rendering existing ones
+            if (newMessages && newMessages !== '<div class="no-transcript">Unable to parse transcript</div>') {
+                dialogContentEl.insertAdjacentHTML('beforeend', newMessages);
+                
+                // Scroll to bottom to show new messages
+                const transcriptContainer = this.transcriptContainer.querySelector('.transcript-container');
+                if (transcriptContainer) {
+                    transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
+                }
+            }
+        } else {
+            // Content was modified or shortened, do full re-render
+            this.renderTranscript(session);
+            return;
+        }
+
+        // Update stored content
+        this.lastTranscriptContent = transcriptText;
+        
+        // Update character count
+        const lengthSpan = this.transcriptContainer.querySelector('.transcript-length');
+        if (lengthSpan) {
+            lengthSpan.textContent = `${transcriptText.length} characters`;
+        }
     }
 
     private renderWellness(session: Interview): void {
@@ -174,9 +252,8 @@ export class SessionDetails {
         }
         
         if (changes.transcript) {
-            this.showUpdateAnimation('tab-transcript');
             this.showTabUpdateIndicator('transcript');
-            this.renderTranscript(session);
+            this.updateTranscriptSmoothly(session);
         }
         
         if (changes.wellness) {
