@@ -447,54 +447,60 @@ export class ApiClient {
                 // Transform server data structure to our expected format
                 const stages: ConversationStage[] = [];
                 const prompts: Prompt[] = [];
-                let stageOrder = 1;
                 
-                // Convert server data categories to stages and prompts
-                for (const [stageId, stageData] of Object.entries(data)) {
-                    console.log(`Processing stage: ${stageId}`, stageData);
-                    
-                    if (typeof stageData === 'object' && stageData !== null) {
-                        // Create stage
-                        const stageName = stageId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        stages.push({
-                            id: stageId,
-                            name: stageName,
-                            description: `Configuration for ${stageName.toLowerCase()}`,
-                            order: stageOrder++
-                        });
-                        
-                        // Handle different data structures from server
-                        if (Array.isArray(stageData)) {
-                            // Direct array of prompts
-                            stageData.forEach((promptText, index) => {
-                                prompts.push({
-                                    id: `${stageId}_${index + 1}`,
-                                    stageId: stageId,
-                                    content: promptText,
-                                    order: index + 1,
-                                    isActive: true,
-                                    description: index === 0 ? 'Question Prompt' : 'Extraction Prompt'
-                                });
+                // Server might return different structure, adapt accordingly
+                if (data.stages && data.prompts) {
+                    // Server returns our expected format
+                    return {
+                        stages: data.stages,
+                        prompts: data.prompts,
+                        lastUpdated: data.lastUpdated || new Date().toISOString()
+                    };
+                } else if (typeof data === 'object') {
+                    // Server returns stage-based structure: {stage_name: {question_prompt, extraction_prompt}}
+                    let stageOrder = 1;
+                    for (const [stageKey, stageData] of Object.entries(data)) {
+                        if (typeof stageData === 'object' && stageData !== null) {
+                            // Create stage
+                            stages.push({
+                                id: stageKey,
+                                name: this.formatStageName(stageKey),
+                                description: `Stage: ${this.formatStageName(stageKey)}`,
+                                order: stageOrder++
                             });
-                        } else if (typeof stageData === 'object') {
-                            // Object with prompts - check various possible structures
-                            const stageObj = stageData as any;
-                            const prompts_array = stageObj.prompts || stageObj.questions || stageObj.items || Object.values(stageData);
-                            if (Array.isArray(prompts_array)) {
-                                prompts_array.forEach((promptText, index) => {
-                                    if (typeof promptText === 'string') {
-                                        prompts.push({
-                                            id: `${stageId}_${index + 1}`,
-                                            stageId: stageId,
-                                            content: promptText,
-                                            order: index + 1,
-                                            isActive: true,
-                                            description: index === 0 ? 'Question Prompt' : 'Extraction Prompt'
-                                        });
-                                    }
+                            
+                            // Create prompts for this stage
+                            const stageDataObj = stageData as any;
+                            if (stageDataObj.question_prompt) {
+                                prompts.push({
+                                    id: `${stageKey}_question`,
+                                    stageId: stageKey,
+                                    content: stageDataObj.question_prompt,
+                                    order: 1,
+                                    isActive: true,
+                                    description: 'Question Prompt'
+                                });
+                            }
+                            if (stageDataObj.extraction_prompt) {
+                                prompts.push({
+                                    id: `${stageKey}_extraction`,
+                                    stageId: stageKey,
+                                    content: stageDataObj.extraction_prompt,
+                                    order: 2,
+                                    isActive: true,
+                                    description: 'Extraction Prompt'
                                 });
                             }
                         }
+                    }
+                    
+                    if (stages.length > 0) {
+                        console.log('✅ Successfully transformed server data:', { stages: stages.length, prompts: prompts.length });
+                        return {
+                            stages,
+                            prompts,
+                            lastUpdated: new Date().toISOString()
+                        };
                     }
                 }
                 
@@ -524,13 +530,31 @@ export class ApiClient {
         return this.getMockPromptsConfiguration();
     }
 
+    private formatStageName(stageKey: string): string {
+        return stageKey
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
     async updateStagePrompts(stageId: string, prompts: Prompt[]): Promise<boolean> {
         try {
             console.log('🔄 Saving prompts for stage:', stageId, { promptCount: prompts.length });
             
+            // Convert our Prompt[] format to server's expected format
+            const questionPrompt = prompts.find(p => p.description?.includes('Question'))?.content || '';
+            const extractionPrompt = prompts.find(p => p.description?.includes('Extraction'))?.content || '';
+            
+            const serverFormat = {
+                question_prompt: questionPrompt,
+                extraction_prompt: extractionPrompt
+            };
+            
+            console.log('📡 Sending to server:', serverFormat);
+            
             const response = await this.makeRequest(`/api/prompts/${stageId}`, {
                 method: 'PUT',
-                body: JSON.stringify({ prompts })
+                body: JSON.stringify(serverFormat)
             });
             
             console.log('✅ Stage prompts saved successfully:', response);

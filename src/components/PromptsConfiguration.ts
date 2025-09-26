@@ -41,9 +41,19 @@ export class PromptsConfigurationComponent {
             return;
         }
 
-        // Set first stage as active if none selected
-        if (!this.activeStageId && this.currentConfig.stages.length > 0) {
+        // Restore active stage from localStorage or set first stage as active
+        const savedActiveStage = localStorage.getItem('wlnx-active-prompts-stage');
+        if (savedActiveStage && this.currentConfig.stages.find(s => s.id === savedActiveStage)) {
+            this.activeStageId = savedActiveStage;
+            console.log('🔄 Restored active stage from localStorage:', savedActiveStage);
+        } else if (!this.activeStageId && this.currentConfig.stages.length > 0) {
             this.activeStageId = this.currentConfig.stages[0].id;
+            console.log('🔄 Set default active stage:', this.activeStageId);
+        }
+        
+        // Always save current active stage to localStorage to ensure persistence
+        if (this.activeStageId) {
+            localStorage.setItem('wlnx-active-prompts-stage', this.activeStageId);
         }
 
         const html = `
@@ -174,6 +184,9 @@ export class PromptsConfigurationComponent {
 
     private showStage(stageId: string): void {
         this.activeStageId = stageId;
+        
+        // Save active stage to localStorage
+        localStorage.setItem('wlnx-active-prompts-stage', stageId);
         
         // Update tab buttons
         document.querySelectorAll('.stage-tab-btn').forEach(btn => {
@@ -322,7 +335,16 @@ export class PromptsConfigurationComponent {
             
             console.log('🔄 Reloading configuration from server');
             
+            // Save current active stage to restore after reload
+            const currentActiveStage = this.activeStageId;
+            
             await this.loadConfiguration();
+            
+            // Restore the active stage if it still exists
+            if (currentActiveStage && this.currentConfig?.stages.find(s => s.id === currentActiveStage)) {
+                this.activeStageId = currentActiveStage;
+            }
+            
             this.render();
             this.showSuccess('Configuration reloaded from server');
         } catch (error) {

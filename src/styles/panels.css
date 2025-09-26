@@ -66,10 +66,12 @@
 }
 
 .panel.collapsed .panel-header {
-    padding: var(--space-sm);
+    padding: var(--space-xs);
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: center;
     height: 100%;
+    position: relative;
 }
 
 .panel.collapsed .panel-header h2 {
@@ -79,6 +81,8 @@
     white-space: nowrap;
     margin: 0;
     transform: rotate(180deg);
+    margin-top: var(--space-sm);
+    margin-right: 24px; /* Отступ от стрелочки */
 }
 
 .panel.collapsed .panel-subtitle,
@@ -87,11 +91,17 @@
 }
 
 .panel.collapsed .panel-header-actions {
-    margin-top: var(--space-sm);
+    position: absolute;
+    top: var(--space-xs);
+    right: var(--space-xs);
+    margin: 0;
 }
 
 .panel.collapsed .collapse-panel-btn {
     transform: rotate(90deg);
+    width: 20px;
+    height: 20px;
+    padding: 4px;
 }
 
 /* Panel Headers */

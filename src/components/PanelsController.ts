@@ -19,7 +19,7 @@ export class PanelsController {
     private currentSession: Interview | null = null;
     private pollingInterval: number | null = null;
     private usersPollingInterval: number | null = null;
-    private readonly POLLING_INTERVAL_MS = 5000; // 5 seconds
+    private readonly POLLING_INTERVAL_MS = 1000; // 1 second for fast transcription updates
     private readonly USERS_POLLING_INTERVAL_MS = 30000; // 30 seconds for users
 
     constructor(apiClient: ApiClient) {
