@@ -1,11 +1,13 @@
 import { PromptsConfiguration } from '../types/api.js';
 import { ApiClient } from '../api/client.js';
+import { CoachConfiguration } from './CoachConfiguration.js';
 
 export class PromptsConfigurationComponent {
     private container: HTMLElement;
     private apiClient: ApiClient;
     private currentConfig: PromptsConfiguration | null = null;
     private activeStageId: string = '';
+    private coachConfig: CoachConfiguration | null = null;
 
     constructor(container: HTMLElement, apiClient: ApiClient) {
         this.container = container;
@@ -87,6 +89,10 @@ export class PromptsConfigurationComponent {
 
         const html = `
             <div class="prompts-tabs">
+                <button class="stage-tab-btn ${this.activeStageId === 'coach' ? 'active' : ''}" 
+                        data-stage="coach">
+                    Coach
+                </button>
                 ${this.currentConfig.stages.map(stage => `
                     <button class="stage-tab-btn ${stage.id === this.activeStageId ? 'active' : ''}" 
                             data-stage="${stage.id}">
@@ -94,6 +100,12 @@ export class PromptsConfigurationComponent {
                     </button>
                 `).join('')}
             </div>
+                <div class="stage-content ${this.activeStageId === 'coach' ? 'active' : ''}" 
+                     data-stage="coach">
+                    <div id="coach-content-embedded">
+                        <div class="loading">Loading coach configuration...</div>
+                    </div>
+                </div>
                 ${this.currentConfig.stages.map(stage => `
                     <div class="stage-content ${stage.id === this.activeStageId ? 'active' : ''}" 
                          data-stage="${stage.id}">
@@ -232,6 +244,34 @@ export class PromptsConfigurationComponent {
         document.querySelectorAll('.stage-content').forEach(content => {
             content.classList.toggle('active', content.getAttribute('data-stage') === stageId);
         });
+        
+        // Initialize coach configuration if coach tab is selected
+        if (stageId === 'coach') {
+            this.initializeCoachConfig();
+        }
+    }
+    
+    private async initializeCoachConfig(): Promise<void> {
+        if (this.coachConfig) {
+            console.log('🔄 Coach config already exists, keeping current state');
+            return;
+        }
+        
+        console.log('🔄 Initializing embedded coach configuration...');
+        const container = document.getElementById('coach-content-embedded');
+        if (!container) {
+            console.error('❌ Coach content container not found!');
+            return;
+        }
+
+        try {
+            this.coachConfig = new CoachConfiguration(container, this.apiClient);
+            console.log('✅ CoachConfiguration created, calling initialize...');
+            await this.coachConfig.initialize();
+            console.log('✅ Embedded coach configuration initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize embedded coach configuration:', error);
+        }
     }
 
 

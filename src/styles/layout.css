@@ -43,9 +43,18 @@
 .status-item {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s ease;
+}
+
+.status-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .status-dot {

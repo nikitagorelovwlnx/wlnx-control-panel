@@ -21,11 +21,10 @@ export class ControlPanel {
         await this.loadInitialData();
         this.setupEventHandlers();
         
-        // Start periodic data refresh - very fast polling for instant updates
+        // Start periodic data refresh - only for dashboard data, no health checks
         setInterval(() => {
-            this.checkSystemStatus();
             this.refreshData();
-        }, 500); // Check every 0.5 seconds for instant updates
+        }, 500); // Check every 0.5 seconds for dashboard data only
     }
 
     private setupEventHandlers(): void {
@@ -33,6 +32,20 @@ export class ControlPanel {
         const refreshBtn = document.getElementById('refresh-btn');
         refreshBtn?.addEventListener('click', () => {
             this.refresh();
+        });
+
+        // Health check buttons
+        const serverStatusBtn = document.getElementById('server-status');
+        const botStatusBtn = document.getElementById('bot-status');
+        
+        serverStatusBtn?.addEventListener('click', async () => {
+            console.log('🔄 Manual server health check...');
+            await this.checkServerStatus();
+        });
+        
+        botStatusBtn?.addEventListener('click', async () => {
+            console.log('🔄 Manual bot health check...');
+            await this.checkBotStatus();
         });
 
         // Keyboard shortcuts
@@ -92,6 +105,74 @@ export class ControlPanel {
             if (serverDot) {
                 serverDot.classList.remove('online');
                 serverDot.classList.add('offline');
+            }
+            if (botDot) {
+                botDot.classList.remove('online');
+                botDot.classList.add('offline');
+            }
+        }
+    }
+
+    private async checkServerStatus(): Promise<void> {
+        try {
+            const serverStatusElement = document.getElementById('server-status-text');
+            const serverDot = document.querySelector('#server-status .status-dot');
+            
+            if (serverStatusElement) {
+                serverStatusElement.textContent = 'Checking...';
+            }
+            
+            const isOnline = await this.apiClient.checkServerConnection();
+            
+            if (serverStatusElement) {
+                serverStatusElement.textContent = isOnline ? 'Online' : 'Offline';
+            }
+            
+            if (serverDot) {
+                serverDot.classList.toggle('online', isOnline);
+                serverDot.classList.toggle('offline', !isOnline);
+            }
+        } catch (error) {
+            console.error('Failed to check server status:', error);
+            const serverStatusElement = document.getElementById('server-status-text');
+            const serverDot = document.querySelector('#server-status .status-dot');
+            
+            if (serverStatusElement) {
+                serverStatusElement.textContent = 'Offline';
+            }
+            if (serverDot) {
+                serverDot.classList.remove('online');
+                serverDot.classList.add('offline');
+            }
+        }
+    }
+
+    private async checkBotStatus(): Promise<void> {
+        try {
+            const botStatusElement = document.getElementById('bot-status-text');
+            const botDot = document.querySelector('#bot-status .status-dot');
+            
+            if (botStatusElement) {
+                botStatusElement.textContent = 'Checking...';
+            }
+            
+            const isOnline = await this.apiClient.checkBotStatus();
+            
+            if (botStatusElement) {
+                botStatusElement.textContent = isOnline ? 'Online' : 'Offline';
+            }
+            
+            if (botDot) {
+                botDot.classList.toggle('online', isOnline);
+                botDot.classList.toggle('offline', !isOnline);
+            }
+        } catch (error) {
+            console.error('Failed to check bot status:', error);
+            const botStatusElement = document.getElementById('bot-status-text');
+            const botDot = document.querySelector('#bot-status .status-dot');
+            
+            if (botStatusElement) {
+                botStatusElement.textContent = 'Offline';
             }
             if (botDot) {
                 botDot.classList.remove('online');
