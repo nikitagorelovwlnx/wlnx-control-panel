@@ -39,12 +39,16 @@ export class CoachConfiguration {
     }
 
     private render(): void {
-        if (this.coaches.length === 0) {
+        if (!this.coaches || this.coaches.length === 0) {
             this.showError('No coaches available');
             return;
         }
 
         const activeCoach = this.coaches.find(c => c.id === this.activeCoachId) || this.coaches[0];
+        if (!activeCoach) {
+            this.showError('No active coach found');
+            return;
+        }
 
         const html = `
             <div class="coach-configuration">
@@ -77,9 +81,9 @@ export class CoachConfiguration {
                             class="coach-prompt-textarea"
                             placeholder="Enter the main coaching prompt..."
                             rows="12"
-                        >${activeCoach.prompt}</textarea>
+                        >${activeCoach.prompt || ''}</textarea>
                         <div class="prompt-info">
-                            <span class="char-count">${activeCoach.prompt.length} characters</span>
+                            <span class="char-count">${(activeCoach.prompt || '').length} characters</span>
                         </div>
                     </div>
                     
@@ -114,7 +118,8 @@ export class CoachConfiguration {
                 const target = e.target as HTMLTextAreaElement;
                 const charCount = document.querySelector('.char-count');
                 if (charCount) {
-                    charCount.textContent = `${target.value.length} characters`;
+                    const value = target.value || '';
+                    charCount.textContent = `${value.length} characters`;
                 }
             });
 
@@ -190,7 +195,7 @@ export class CoachConfiguration {
             // Update character count
             const charCount = document.querySelector('.char-count');
             if (charCount) {
-                charCount.textContent = `${defaultPrompt.length} characters`;
+                charCount.textContent = `${(defaultPrompt || '').length} characters`;
             }
         }
         
