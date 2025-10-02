@@ -225,6 +225,182 @@
     stroke-width: 2.5;
 }
 
+/* Coach Configuration Styles */
+.coach-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.coach-content {
+    flex: 1;
+    padding: var(--space-lg);
+    overflow-y: auto;
+}
+
+.coach-configuration {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.coach-header {
+    margin-bottom: var(--space-lg);
+    text-align: center;
+}
+
+.coach-header h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-sm) 0;
+}
+
+.coach-header p {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.coach-selector {
+    margin-bottom: var(--space-lg);
+}
+
+.coach-selector label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.coach-select {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.coach-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.coach-details {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: var(--space-lg);
+}
+
+.coach-info {
+    margin-bottom: var(--space-lg);
+}
+
+.coach-info h4 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.coach-description {
+    color: var(--text-secondary);
+    margin: 0;
+    font-style: italic;
+}
+
+.coach-prompt-section {
+    margin-bottom: var(--space-lg);
+}
+
+.coach-prompt-section label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.coach-prompt-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: var(--space-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+}
+
+.coach-prompt-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.prompt-info {
+    margin-top: var(--space-xs);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.char-count {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.coach-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+}
+
+.coach-actions .btn {
+    padding: var(--space-sm) var(--space-md);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.coach-actions .btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.coach-actions .btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+}
+
+.coach-actions .btn-primary:disabled {
+    background: var(--border);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.coach-actions .btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.coach-actions .btn-secondary:hover {
+    background: var(--border-light);
+    transform: translateY(-1px);
+}
+
 
 .prompts-stages {
     display: flex;

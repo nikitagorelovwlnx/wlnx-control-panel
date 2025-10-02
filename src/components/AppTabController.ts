@@ -1,9 +1,11 @@
 import { PromptsConfigurationComponent } from './PromptsConfiguration.js';
+import { CoachConfiguration } from './CoachConfiguration.js';
 import { ApiClient } from '../api/client.js';
 
 export class AppTabController {
     private currentTab: string = 'dashboard';
     private promptsConfig: PromptsConfigurationComponent | null = null;
+    private coachConfig: CoachConfiguration | null = null;
     private apiClient: ApiClient;
 
     constructor(apiClient: ApiClient) {
@@ -53,39 +55,50 @@ export class AppTabController {
         // Update tab content
         console.log('🔄 Updating tab content for:', tabId);
         
-        // Force hide dashboard when prompts is selected
+        // Handle tab visibility
         const dashboardTab = document.getElementById('app-tab-dashboard');
         const promptsTab = document.getElementById('app-tab-prompts');
+        const coachTab = document.getElementById('app-tab-coach');
+        const panelsContainer = document.getElementById('panels-container');
         
-        if (tabId === 'prompts') {
-            if (dashboardTab) {
-                dashboardTab.style.display = 'none';
-                dashboardTab.classList.remove('active');
-            }
-            if (promptsTab) {
-                promptsTab.style.display = 'flex';
-                promptsTab.classList.add('active');
-            }
-            
-            // Hide entire panels container
-            const panelsContainer = document.getElementById('panels-container');
-            if (panelsContainer) {
-                panelsContainer.style.display = 'none';
-            }
-        } else if (tabId === 'dashboard') {
-            if (promptsTab) {
-                promptsTab.style.display = 'none';
-                promptsTab.classList.remove('active');
-            }
+        // Hide all tabs first
+        if (dashboardTab) {
+            dashboardTab.style.display = 'none';
+            dashboardTab.classList.remove('active');
+        }
+        if (promptsTab) {
+            promptsTab.style.display = 'none';
+            promptsTab.classList.remove('active');
+        }
+        if (coachTab) {
+            coachTab.style.display = 'none';
+            coachTab.classList.remove('active');
+        }
+        
+        // Show selected tab
+        if (tabId === 'dashboard') {
             if (dashboardTab) {
                 dashboardTab.style.display = 'flex';
                 dashboardTab.classList.add('active');
             }
-            
-            // Show panels container back
-            const panelsContainer = document.getElementById('panels-container');
             if (panelsContainer) {
                 panelsContainer.style.display = 'flex';
+            }
+        } else if (tabId === 'prompts') {
+            if (promptsTab) {
+                promptsTab.style.display = 'flex';
+                promptsTab.classList.add('active');
+            }
+            if (panelsContainer) {
+                panelsContainer.style.display = 'none';
+            }
+        } else if (tabId === 'coach') {
+            if (coachTab) {
+                coachTab.style.display = 'flex';
+                coachTab.classList.add('active');
+            }
+            if (panelsContainer) {
+                panelsContainer.style.display = 'none';
             }
         }
         
@@ -102,7 +115,7 @@ export class AppTabController {
             console.log(`  - ${content.id}: active=${isActive}, classes="${content.className}"`);
         });
 
-        // Initialize prompts configuration if needed
+        // Initialize configuration components if needed
         if (tabId === 'prompts') {
             console.log('🎯 Prompts tab selected...');
             
@@ -141,6 +154,16 @@ export class AppTabController {
             } else {
                 console.log('🔄 Prompts config already exists, keeping current state');
             }
+        } else if (tabId === 'coach') {
+            console.log('🎯 Coach tab selected...');
+            
+            // Only initialize if we don't have a coach config yet
+            if (!this.coachConfig) {
+                console.log('🔄 First time on coach tab, initializing...');
+                this.initializeCoachConfig();
+            } else {
+                console.log('🔄 Coach config already exists, keeping current state');
+            }
         }
 
         this.currentTab = tabId;
@@ -173,6 +196,27 @@ export class AppTabController {
             console.log('✅ Prompts configuration initialized successfully');
         } catch (error) {
             console.error('❌ Failed to initialize prompts configuration:', error);
+        }
+    }
+
+    private async initializeCoachConfig(): Promise<void> {
+        console.log('🔄 Initializing coach configuration...');
+        console.log('🔍 Looking for element with ID: coach-content');
+        
+        const container = document.getElementById('coach-content');
+        if (!container) {
+            console.error('❌ Coach content container not found!');
+            console.log('🔍 Checking if app-tab-coach exists:', document.getElementById('app-tab-coach'));
+            return;
+        }
+
+        try {
+            this.coachConfig = new CoachConfiguration(container, this.apiClient);
+            console.log('✅ CoachConfiguration created, calling initialize...');
+            await this.coachConfig.initialize();
+            console.log('✅ Coach configuration initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize coach configuration:', error);
         }
     }
 

@@ -115,3 +115,14 @@ export interface PromptsConfiguration {
     prompts: Prompt[];
     lastUpdated: string;
 }
+
+// Coach types
+export interface Coach {
+    id: string;
+    name: string;
+    description?: string;
+    prompt: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+}

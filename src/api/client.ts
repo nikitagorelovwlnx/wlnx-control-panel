@@ -1,4 +1,4 @@
-import { User, ChatMessage, InterviewSummary, Interview, HealthResponse, PingResponse, PromptsConfiguration, ConversationStage, Prompt } from '../types/api.js';
+import { User, ChatMessage, InterviewSummary, Interview, HealthResponse, PingResponse, PromptsConfiguration, ConversationStage, Prompt, Coach } from '../types/api.js';
 
 export class ApiClient {
     private baseUrl: string;
@@ -602,6 +602,60 @@ export class ApiClient {
             prompts,
             lastUpdated: new Date().toISOString()
         };
+    }
+
+    // Coach API methods
+    async getCoaches(): Promise<Coach[]> {
+        try {
+            console.log('🔄 Fetching coaches from /api/coaches');
+            const response = await this.makeRequest<any>('/api/coaches');
+            console.log('📡 Coaches response:', response);
+            
+            // Handle different response formats
+            const coaches = response.coaches || response.data || response;
+            if (Array.isArray(coaches)) {
+                return coaches;
+            }
+            
+            console.warn('⚠️ Invalid coaches response format, using mock data');
+        } catch (error) {
+            console.error('❌ Failed to fetch coaches:', error);
+        }
+        
+        // Fallback to mock data
+        return this.getMockCoaches();
+    }
+
+    async updateCoach(coachId: string, prompt: string): Promise<boolean> {
+        try {
+            console.log('🔄 Updating coach:', coachId, 'with prompt length:', prompt.length);
+            
+            const response = await this.makeRequest(`/api/coaches/${coachId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ prompt })
+            });
+            
+            console.log('✅ Coach updated successfully:', response);
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Failed to update coach:', error);
+            throw error;
+        }
+    }
+
+    private getMockCoaches(): Coach[] {
+        return [
+            {
+                id: 'default-coach',
+                name: 'Default Wellness Coach',
+                description: 'The main wellness coaching assistant',
+                prompt: 'You are Anna, a professional wellness coach. You help people with nutrition, fitness, and overall health. Be empathetic, supportive, and provide practical advice. Always maintain a warm and encouraging tone.',
+                isActive: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            }
+        ];
     }
 
 }
