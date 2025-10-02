@@ -614,6 +614,7 @@ export class ApiClient {
             // Handle different response formats
             const coaches = response.coaches || response.data || response;
             if (Array.isArray(coaches)) {
+                console.log('✅ Using API coaches data:', coaches);
                 return coaches;
             }
             
@@ -623,7 +624,9 @@ export class ApiClient {
         }
         
         // Fallback to mock data
-        return this.getMockCoaches();
+        const mockCoaches = this.getMockCoaches();
+        console.log('🎭 Using mock coaches data:', mockCoaches);
+        return mockCoaches;
     }
 
     async updateCoach(coachId: string, prompt: string): Promise<boolean> {
@@ -632,7 +635,7 @@ export class ApiClient {
             
             const response = await this.makeRequest(`/api/coaches/${coachId}`, {
                 method: 'PUT',
-                body: JSON.stringify({ prompt })
+                body: JSON.stringify({ coach_prompt_content: prompt })
             });
             
             console.log('✅ Coach updated successfully:', response);
@@ -650,7 +653,7 @@ export class ApiClient {
                 id: 'default-coach',
                 name: 'Default Wellness Coach',
                 description: 'The main wellness coaching assistant',
-                prompt: 'You are Anna, a professional wellness coach. You help people with nutrition, fitness, and overall health. Be empathetic, supportive, and provide practical advice. Always maintain a warm and encouraging tone.',
+                coach_prompt_content: 'You are Anna, a professional wellness coach. You help people with nutrition, fitness, and overall health. Be empathetic, supportive, and provide practical advice. Always maintain a warm and encouraging tone.',
                 isActive: true,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()

@@ -5,6 +5,7 @@ import { WellnessForm } from './WellnessForm.js';
 export class SessionDetails {
     private summaryContainer: HTMLElement;
     private transcriptContainer: HTMLElement;
+    private chatgptContainer: HTMLElement;
     private wellnessContainer: HTMLElement;
     private tabsController: TabsController;
     private wellnessForm: WellnessForm;
@@ -13,6 +14,7 @@ export class SessionDetails {
     constructor(detailsContainer: HTMLElement) {
         this.summaryContainer = detailsContainer.querySelector('#summary-content')!;
         this.transcriptContainer = detailsContainer.querySelector('#transcript-content')!;
+        this.chatgptContainer = detailsContainer.querySelector('#chatgpt-content')!;
         this.wellnessContainer = detailsContainer.querySelector('#wellness-content')!;
         
         this.tabsController = new TabsController(detailsContainer);
@@ -30,6 +32,7 @@ export class SessionDetails {
         
         this.renderSummary(session);
         this.renderTranscript(session);
+        this.renderChatGPT(session);
         this.renderWellness(session);
         
         // Switch to summary tab by default
@@ -159,6 +162,61 @@ export class SessionDetails {
         console.log('Transcript HTML length:', transcriptHtml.length);
         this.transcriptContainer.innerHTML = transcriptHtml;
         console.log('Transcript container after setting HTML:', this.transcriptContainer.innerHTML);
+    }
+
+    private renderChatGPT(session: Interview): void {
+        console.log('Rendering ChatGPT conversation for session:', session.id);
+        console.log('ChatGPT container:', this.chatgptContainer);
+        console.log('Session bot_conversation:', session.bot_conversation);
+        
+        const chatGPTData = session.bot_conversation as any;
+        
+        if (!chatGPTData || (typeof chatGPTData === 'string' && chatGPTData.trim() === '')) {
+            this.chatgptContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>No Chat GPT conversation</h3>
+                    <p>No Chat GPT conversation available for this session.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Convert ChatGPT data to string if needed
+        let chatGPTText = '';
+        if (typeof chatGPTData === 'string') {
+            chatGPTText = chatGPTData;
+        } else if (Array.isArray(chatGPTData)) {
+            chatGPTText = chatGPTData.map((item: any) => {
+                if (typeof item === 'string') return item;
+                if (item.content) return item.content;
+                if (item.text) return item.text;
+                return JSON.stringify(item);
+            }).join('\n');
+        } else {
+            chatGPTText = JSON.stringify(chatGPTData, null, 2);
+        }
+
+        // Store current content for smooth updates (if needed in future)
+
+        // Format ChatGPT conversation as a dialog (reuse the same formatting)
+        const dialogHtml = this.formatTranscriptAsDialog(chatGPTText);
+        
+        const chatGPTHtml = `
+            <div class="chatgpt-container">
+                <div class="chatgpt-header">
+                    <h4>🤖 Chat GPT Conversation</h4>
+                    <div class="chatgpt-meta">
+                        <span class="chatgpt-length">${chatGPTText.length} characters</span>
+                    </div>
+                </div>
+                <div class="dialog-content" id="chatgpt-dialog-content-${session.id}">
+                    ${dialogHtml}
+                </div>
+            </div>
+        `;
+        
+        console.log('Setting ChatGPT HTML:', chatGPTHtml);
+        this.chatgptContainer.innerHTML = chatGPTHtml;
     }
 
     private updateTranscriptSmoothly(session: Interview): void {

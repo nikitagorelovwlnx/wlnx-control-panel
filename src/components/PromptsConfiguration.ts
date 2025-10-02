@@ -64,7 +64,11 @@ export class PromptsConfigurationComponent {
         console.log('🔄 Render: Current activeStageId before validation:', this.activeStageId);
         
         // If localStorage has a valid stage, use it regardless of current activeStageId
-        if (savedActiveStage && this.currentConfig.stages.find(s => s.id === savedActiveStage)) {
+        // Allow 'coach' as a valid saved stage
+        const isValidSavedStage = savedActiveStage === 'coach' || 
+                                (savedActiveStage && this.currentConfig.stages.find(s => s.id === savedActiveStage));
+        
+        if (savedActiveStage && isValidSavedStage) {
             if (this.activeStageId !== savedActiveStage) {
                 console.log('🔄 Render: Overriding activeStageId with localStorage value:', savedActiveStage);
                 this.activeStageId = savedActiveStage;
@@ -72,7 +76,11 @@ export class PromptsConfigurationComponent {
         }
         
         // Final validation - if still no valid activeStageId, use default
-        if (!this.activeStageId || !this.currentConfig.stages.find(s => s.id === this.activeStageId)) {
+        // Allow 'coach' as a valid stage even if it's not in currentConfig.stages
+        const isValidStage = this.activeStageId === 'coach' || 
+                           (this.activeStageId && this.currentConfig.stages.find(s => s.id === this.activeStageId));
+        
+        if (!this.activeStageId || !isValidStage) {
             if (this.currentConfig.stages.length > 0) {
                 this.activeStageId = this.currentConfig.stages[0].id;
                 console.log('🔄 Render: Set default active stage:', this.activeStageId);

@@ -46,6 +46,7 @@ export interface Interview {
     updated_at: string;
     transcription: string;
     summary: string;
+    bot_conversation?: string;  // Chat GPT conversation log
     analysis_results?: any;
     wellness_data?: WellnessData;
     email?: string;  // Computed field for backward compatibility
@@ -121,7 +122,7 @@ export interface Coach {
     id: string;
     name: string;
     description?: string;
-    prompt: string;
+    coach_prompt_content: string;
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
